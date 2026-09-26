@@ -1,18 +1,31 @@
-# Mealheiro
+# 🐷 Mealheiro
 
-Household budget app for two people and a joint account. Log expenses in seconds from your phone, then see where the money goes, month by month.
+> Household budget for two people and a joint account: log expenses in seconds, see where the money goes.
 
-- **Quick add**: type the amount, tap a category, save. The Add screen is the landing page, and you can install the app to your home screen as a PWA.
-- **Month view**: income, expenses, investments, leftover and savings rate. Also budgets with progress bars, insights, a category breakdown you can drill into, and an inbox of pending recurring entries to confirm.
-- **Charts**: 12-month trends by category, income vs expenses vs savings, and year-over-year comparison.
-- **Entries**: search and filter by text, type, category, payer, tag, amount and date, with totals.
-- **Recurring templates**: monthly entries (mortgage, subscriptions, salary, ETF contributions) created automatically on the 1st. Variable ones (electricity, salary) arrive as *pending* estimates for you to confirm.
-- **Settings**: people, categories (icons and colors, archive), templates, budgets, CSV export (`;` separator, decimal comma) and backup download.
-- **Backups**: a nightly `VACUUM INTO` snapshot goes to `data/backups/`, and the last 30 are kept.
+[![release](https://github.com/melojms/mealheiro/actions/workflows/release.yml/badge.svg)](https://github.com/melojms/mealheiro/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/melojms/mealheiro)](https://github.com/melojms/mealheiro/releases/latest)
+[![GHCR image](https://img.shields.io/badge/ghcr.io-melojms%2Fmealheiro-2496ED?logo=docker&logoColor=white)](https://github.com/melojms/mealheiro/pkgs/container/mealheiro)
+[![Go version](https://img.shields.io/github/go-mod/go-version/melojms/mealheiro)](go.mod)
+
+- ⚡ **Quick add**: type the amount, tap a category, save. The Add screen is the landing page.
+- 📅 **Month view**: income, expenses, investments, leftover and savings rate, a category breakdown you can drill into, and an inbox of pending recurring entries to confirm.
+- 📈 **Charts**: 12-month trends by category, income vs expenses vs savings, and year-over-year comparison.
+- 🔎 **Entries**: search and filter by text, type, category, payer, tag, amount and date, with totals.
+- 🔁 **Recurring templates**: monthly entries (mortgage, subscriptions, salary, ETF contributions) created automatically on the 1st. Variable ones (electricity, salary) arrive as *pending* estimates for you to confirm.
+- 🎯 **Budgets**: monthly limits per category and overall, with progress bars.
+- 💡 **Insights**: highlights for the month in the month view.
+- 📤 **CSV export**: `;` separator and decimal comma, filtered by date range and type.
+- 💾 **Backups**: a nightly `VACUUM INTO` snapshot goes to `data/backups/` (last 30 kept), plus a download button in Settings.
+- 🌙 **Dark mode**: light, dark, or follow the system.
+- 📱 **PWA**: install it to your phone's home screen.
+
+Settings also covers people, categories (icons and colors, archive) and templates.
+
+## ⚠️ Security note
 
 There is no authentication. Run it on a trusted network (LAN or VPN).
 
-## Run with Docker
+## 🚀 Run with Docker
 
 ```sh
 cp .env.example .env        # adjust PORT, DATA_LOCATION, TZ
@@ -40,7 +53,7 @@ Then point the proxy at `mealheiro:8080`.
 
 To restore a backup, stop the app and replace `data/mealheiro.db` with a snapshot from `data/backups/`. Then start it again.
 
-## Releases & deploy
+## 🏷️ Releases & deploy
 
 Every merge to `main` runs [`.github/workflows/release.yml`](.github/workflows/release.yml): tests, then a `vX.Y.Z` tag, a GitHub Release with generated notes, and an image on GHCR.
 
@@ -62,7 +75,7 @@ echo "$PAT" | docker login ghcr.io -u melojms --password-stdin
 
 `make up` still builds the image locally from source.
 
-## Develop
+## 🛠️ Develop
 
 Requirements: Go 1.27, Node 24, [sqlc](https://sqlc.dev), [gofumpt](https://github.com/mvdan/gofumpt).
 
@@ -74,7 +87,7 @@ make generate    # sqlc after editing internal/store/queries/*.sql
 make e2e         # Playwright smoke test (expects the app on :8080)
 ```
 
-Layout:
+## 🗂️ Layout
 
 ```
 cmd/mealheiro        main: HTTP server, recurring + backup jobs, healthcheck subcommand
