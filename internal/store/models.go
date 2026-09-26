@@ -43,6 +43,27 @@ type EntryTag struct {
 	TagID   int64
 }
 
+type EntryView struct {
+	ID                 int64
+	Type               string
+	Date               string
+	AmountCents        int64
+	CategoryID         int64
+	CategoryName       string
+	ParentCategoryID   *int64
+	ParentCategoryName string
+	TopCategoryID      int64
+	PayerID            int64
+	PayerName          string
+	Note               string
+	Status             string
+	TemplateID         *int64
+	TemplateMonth      *string
+	TagsCsv            string
+	CreatedAt          string
+	UpdatedAt          string
+}
+
 type Person struct {
 	ID        int64
 	Name      string

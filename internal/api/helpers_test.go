@@ -74,3 +74,27 @@ func TestHealthAndMeta(t *testing.T) {
 		t.Fatalf("meta = %v", meta)
 	}
 }
+
+func TestEntryViewMapping(t *testing.T) {
+	s, _ := newTestServer(t)
+	ctx := t.Context()
+	res, err := s.DB.ExecContext(ctx, `INSERT INTO entries (type, date, amount_cents, category_id, payer_id, note) VALUES ('expense','2026-03-01',1250,51,3,'x')`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	id, _ := res.LastInsertId()
+	if _, err := s.DB.ExecContext(ctx, `INSERT INTO tags (id, name) VALUES (1,'zeta'),(2,'alpha'); INSERT INTO entry_tags VALUES (?,1),(?,2)`, id, id); err != nil {
+		t.Fatal(err)
+	}
+	v, err := s.Q.GetEntryView(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := entryFromView(v)
+	if e.ParentCategoryName == nil || *e.ParentCategoryName != "House" || e.CategoryName != "Mortgage" || e.PayerName != "Joint" {
+		t.Fatalf("unexpected mapping: %+v", e)
+	}
+	if len(e.Tags) != 2 || e.Tags[0] != "alpha" || e.Tags[1] != "zeta" || e.Recurring {
+		t.Fatalf("tags/recurring: %+v", e)
+	}
+}
