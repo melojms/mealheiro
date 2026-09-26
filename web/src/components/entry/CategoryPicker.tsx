@@ -48,7 +48,7 @@ export function CategoryPicker({ categories, value, onChange, size = "lg", loadi
               aria-checked={active}
               onClick={() => onChange(c.id)}
               className={cn(
-                "flex flex-col items-center justify-start gap-1.5 rounded-xl px-1 text-center transition-all outline-none select-none",
+                "flex flex-col items-center justify-start gap-1.5 rounded-xl text-center transition-all outline-none select-none",
                 "focus-visible:ring-ring/50 hover:bg-muted/60 focus-visible:ring-3 active:scale-95",
                 size === "lg" ? "py-2.5" : "py-2",
               )}
