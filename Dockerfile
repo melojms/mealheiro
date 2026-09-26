@@ -17,10 +17,10 @@ COPY --from=web /src/web/dist ./web/dist
 ARG VERSION=dev
 RUN go build -trimpath -ldflags "-s -w -X github.com/melojms/mealheiro/internal/api.Version=${VERSION}" -o /out/mealheiro ./cmd/mealheiro
 
-FROM gcr.io/distroless/static-debian12:nonroot
+# Starts as root only to chown /data and drop to PUID:PGID (internal/privdrop).
+FROM gcr.io/distroless/static-debian12
 COPY --from=build /out/mealheiro /mealheiro
-ENV DATA_DIR=/data PORT=7447 TZ=Europe/Lisbon
+ENV DATA_DIR=/data PORT=7447 TZ=Europe/Lisbon PUID=1000 PGID=1000
 EXPOSE 7447
-USER nonroot:nonroot
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD ["/mealheiro", "healthcheck"]
 ENTRYPOINT ["/mealheiro"]

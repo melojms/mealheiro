@@ -17,6 +17,7 @@ import (
 	"github.com/melojms/mealheiro/internal/api"
 	"github.com/melojms/mealheiro/internal/backup"
 	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/privdrop"
 	"github.com/melojms/mealheiro/internal/recurring"
 	"github.com/melojms/mealheiro/internal/store"
 	"github.com/melojms/mealheiro/web"
@@ -49,6 +50,11 @@ func run() error {
 	addr := ":" + strconv.Itoa(port)
 	dataDir := env("DATA_DIR", "./data")
 	tz := env("TZ", "Europe/Lisbon")
+
+	// Runs before anything touches dataDir: as root it chowns it and drops to PUID:PGID.
+	if err := privdrop.Prepare(privdrop.OS(), log, dataDir, os.Getenv("PUID"), os.Getenv("PGID")); err != nil {
+		return err
+	}
 
 	loc, err := time.LoadLocation(tz)
 	if err != nil {

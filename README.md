@@ -27,13 +27,31 @@ There is no authentication. Run it on a trusted network (LAN or VPN).
 
 ## 🚀 Run with Docker
 
-```sh
-cp .env.example .env        # adjust HOST_PORT, DATA_LOCATION, TZ
-mkdir -p data && sudo chown 65532:65532 data   # container runs as non-root 65532 (or set PUID/PGID)
-make up                     # docker compose up -d --build
+Just mount a folder. It can be missing, empty, root-owned or left over from an older version: the container fixes ownership itself, then drops to `PUID:PGID` (default `1000:1000`). No `chown` needed.
+
+Minimal `compose.yaml`:
+
+```yaml
+services:
+  mealheiro:
+    image: ghcr.io/melojms/mealheiro:latest
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Lisbon
+    ports:
+      - "7447:7447"
+    volumes:
+      - ./data:/data
 ```
 
-Open `http://<host>:7447` (or your `HOST_PORT`).
+Open `http://<host>:7447`.
+
+From a clone of this repo, the bundled [`compose.yaml`](compose.yaml) adds optional hardening: read-only root filesystem, `no-new-privileges`, and all capabilities dropped except the four needed for the startup chown and privilege drop (explained inline):
+
+```sh
+cp .env.example .env        # optional: HOST_PORT, DATA_LOCATION, PUID/PGID, TZ
+make up                     # build from source; or `make pull-up` for the released image
+```
 
 Behind a reverse proxy that uses an external Docker network called `proxy`, no port is published:
 
@@ -48,7 +66,7 @@ Then point the proxy at `mealheiro:$PORT` (`mealheiro:7447` by default).
 | `HOST_PORT` | `7447` | Host port the app is published on (base compose only) |
 | `PORT` | `7447` | Port the server listens on inside the container (1-65535) |
 | `DATA_LOCATION` | `./data` | Host dir for `mealheiro.db` and `backups/` |
-| `PUID` / `PGID` | `65532` | User the container runs as. Must own `DATA_LOCATION` |
+| `PUID` / `PGID` | `1000` | Owner of the files in `DATA_LOCATION`; the container fixes permissions itself and runs as this user |
 | `TZ` | `Europe/Lisbon` | Defines "today" and recurring generation |
 | `LOG_LEVEL` | `info` | `debug` logs every request |
 
@@ -98,6 +116,7 @@ internal/recurring   monthly template generation
 internal/reports     month/trends/year aggregation + insights
 internal/export      CSV export
 internal/backup      VACUUM INTO snapshots
+internal/privdrop    startup chown of the data dir + drop to PUID:PGID
 web/                 React + Vite + Tailwind + shadcn/ui SPA (embedded into the binary)
 docs/                SPEC.md (product spec), API.md (HTTP contract)
 ```

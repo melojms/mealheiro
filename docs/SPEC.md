@@ -17,7 +17,7 @@ Household budget web app for two people (+ a joint account). Goal: see where mon
 | Queries | `sqlc` (one generated file per query file, no interface emission) |
 | Migrations | `goose`, SQL files embedded in the binary, run on startup |
 | Frontend | React + Vite + TypeScript + Tailwind + shadcn/ui + shadcn charts (Recharts), Lucide icons |
-| Packaging | Multi-stage Dockerfile (node → go → distroless nonroot); SPA embedded via `embed` |
+| Packaging | Multi-stage Dockerfile (node → go → distroless, starts as root only to chown `/data` and drop to `PUID:PGID`); SPA embedded via `embed` |
 | Tests | Go tests on real temp SQLite; Vitest for amount parsing/formatting; one Playwright smoke test |
 
 ## 3. Domain
@@ -98,7 +98,7 @@ Date-range dialog + type filter. All entry types with a `type` column. Columns: 
 - Data dir `/data` (SQLite `mealheiro.db`).
 - Nightly backup: `VACUUM INTO /data/backups/mealheiro-YYYYMMDD.db`, keep last 30. Settings has "Download backup" (consistent snapshot `.db`).
 - `/healthz` endpoint (DB ping).
-- `compose.yaml`: publishes `${HOST_PORT:-7447}:${PORT:-7447}` (server listens on `PORT`, default 7447), bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mealheiro`, non-root, `read_only: true`, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, healthcheck.
+- `compose.yaml`: publishes `${HOST_PORT:-7447}:${PORT:-7447}` (server listens on `PORT`, default 7447), bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mealheiro`, runs as `PUID:PGID` (default 1000) after fixing `/data` ownership itself, `read_only: true`, `cap_drop: [ALL]` + `cap_add: [CHOWN, SETUID, SETGID, DAC_READ_SEARCH]`, `security_opt: [no-new-privileges:true]`, healthcheck.
 - `compose.proxy.yaml` override: joins external `proxy` network, removes the published port.
 - `.env.example`, Makefile (`up`, `down`, `logs`, `build`, `test`, `dev`, `generate`). Image `melojms/mealheiro:${VERSION}` built locally.
 

@@ -7,17 +7,24 @@ services:
         VERSION: ${VERSION:-dev}
     container_name: mealheiro
     restart: unless-stopped
-    user: "${PUID:-65532}:${PGID:-65532}"
     environment:
       TZ: ${TZ:-Europe/Lisbon}
       PORT: ${PORT:-7447}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "${HOST_PORT:-7447}:${PORT:-7447}"
     volumes:
       - ${DATA_LOCATION:-./data}:/data
     read_only: true
+    # Starts as root only to chown /data to PUID:PGID, then drops to that user
+    # (all capabilities are gone after the drop). Minimum set, verified:
+    #   CHOWN           chown files in /data owned by someone else
+    #   SETUID, SETGID  switch to PUID:PGID (setuid/setgid/setgroups)
+    #   DAC_READ_SEARCH list dirs root doesn't own, e.g. 0750 dirs left by v0.2 (uid 65532)
     cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_READ_SEARCH]
     security_opt: ["no-new-privileges:true"]
     tmpfs:
       - /tmp
