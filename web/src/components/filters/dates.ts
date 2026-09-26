@@ -33,6 +33,10 @@ export function monthRange(m: string): { from: string; to: string } {
   return { from: `${m}-01`, to: `${m}-${pad(daysInMonth(m))}` }
 }
 
+// Fixed English names: ICU builds disagree on "Sep" vs "Sept" and on weekday punctuation.
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
 function utc(m: string, day = 1): Date {
   const [y, mo] = parseMonth(m)
   return new Date(Date.UTC(y, mo - 1, day))
@@ -45,14 +49,14 @@ export function monthLabel(m: string): string {
 
 /** "2026-03" -> "Mar"; January also carries the year ("Jan '26") so chart axes stay unambiguous. */
 export function shortMonthLabel(m: string): string {
-  const d = utc(m)
-  const name = d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })
+  const name = MONTHS[parseMonth(m)[1] - 1]
   return m.endsWith("-01") ? `${name} '${m.slice(2, 4)}` : name
 }
 
 /** Tooltip-friendly "Mar 2026". */
 export function mediumMonthLabel(m: string): string {
-  return utc(m).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })
+  const [y, mo] = parseMonth(m)
+  return `${MONTHS[mo - 1]} ${y}`
 }
 
 /** Heading for a day in a list: "Today", "Yesterday", "Sat, 14 Mar" (+ year when not the current one). */
@@ -61,18 +65,16 @@ export function dayLabel(date: string, today: string): string {
   const d = new Date(`${date}T00:00:00Z`)
   const t = new Date(`${today}T00:00:00Z`)
   if (t.getTime() - d.getTime() === 86_400_000) return "Yesterday"
-  // Assembled by hand: ICU builds differ on the comma after the weekday.
-  const weekday = d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })
-  const month = d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })
+  const weekday = WEEKDAYS[d.getUTCDay()]
+  const month = MONTHS[d.getUTCMonth()]
   const year = date.slice(0, 4) === today.slice(0, 4) ? "" : ` ${date.slice(0, 4)}`
   return `${weekday}, ${d.getUTCDate()} ${month}${year}`
 }
 
 /** "2026-03-01" -> "1 Mar 2026" */
 export function shortDate(date: string): string {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
-  })
+  const [y, m, d] = date.split("-").map(Number)
+  return `${d} ${MONTHS[m - 1]} ${y}`
 }
 
 export const DATE_PRESETS = [

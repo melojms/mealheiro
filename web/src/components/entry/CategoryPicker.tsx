@@ -55,7 +55,7 @@ export function CategoryPicker({ categories, value, onChange, size = "lg", loadi
               style={active ? { backgroundColor: `${c.color}1f`, boxShadow: `inset 0 0 0 2px ${c.color}` } : undefined}
             >
               <CategoryIcon icon={c.icon} color={c.color} size={size === "lg" ? "lg" : "md"} />
-              <span className={cn("line-clamp-2 w-full text-xs leading-tight", active ? "font-medium" : "text-muted-foreground")}>
+              <span className={cn("line-clamp-2 w-full text-xs leading-tight break-words hyphens-auto", active ? "font-medium" : "text-muted-foreground")}>
                 {c.name}
               </span>
             </button>

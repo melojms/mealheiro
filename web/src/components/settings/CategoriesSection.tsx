@@ -97,7 +97,12 @@ export function CategoriesSection() {
         ) : (
           tops.map((top) => (
             <div key={top.id} className="py-1">
-              <CategoryRow category={top} actions={actions} />
+              <CategoryRow
+                category={top}
+                actions={actions}
+                // Parents show their subtree's usage; entry_count alone is self-only.
+                count={ofType.reduce((n, c) => (c.parent_id === top.id ? n + c.entry_count : n), top.entry_count)}
+              />
               {visible
                 .filter((c) => c.parent_id === top.id)
                 .sort(byName)
@@ -137,7 +142,9 @@ interface RowActions {
   remove: (c: Category) => void
 }
 
-function CategoryRow({ category: c, actions, child }: { category: Category; actions: RowActions; child?: boolean }) {
+function CategoryRow({
+  category: c, actions, child, count = c.entry_count,
+}: { category: Category; actions: RowActions; child?: boolean; count?: number }) {
   return (
     <div className={cn("flex items-center gap-3 py-1.5 pr-2", child ? "pl-8 sm:pl-12" : "pl-3", c.archived && "opacity-60")}>
       {child && <span className="bg-border -ml-4 h-px w-3 shrink-0" aria-hidden />}
@@ -145,7 +152,7 @@ function CategoryRow({ category: c, actions, child }: { category: Category; acti
       <button type="button" onClick={() => actions.edit(c)} className="min-w-0 flex-1 text-left">
         <span className={cn("block truncate", child ? "text-sm" : "text-sm font-medium")}>{c.name}</span>
         <span className="text-muted-foreground block text-xs">
-          {c.entry_count} {c.entry_count === 1 ? "entry" : "entries"}
+          {count} {count === 1 ? "entry" : "entries"}
         </span>
       </button>
       {c.archived && <Badge variant="secondary">Archived</Badge>}

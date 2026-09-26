@@ -18,7 +18,7 @@ export function KpiCard({
   className?: string
 }) {
   return (
-    <Card size="sm" className={cn("gap-1.5 px-3.5", className)}>
+    <Card size="sm" role="group" aria-label={label} className={cn("gap-1.5 px-3.5", className)}>
       <div className="text-muted-foreground flex items-center justify-between gap-2 text-xs font-medium">
         <span className="truncate">{label}</span>
         <span className={cn("bg-muted flex size-6 shrink-0 items-center justify-center rounded-full", accent)}>

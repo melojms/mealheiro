@@ -1,5 +1,6 @@
 import {
-  addMonths, dayLabel, daysInMonth, isDate, isMonth, monthLabel, monthRange, presetRange, shortMonthLabel,
+  addMonths, dayLabel, daysInMonth, isDate, isMonth, mediumMonthLabel, monthLabel, monthRange, presetRange, shortDate,
+  shortMonthLabel,
 } from "./dates"
 
 describe("addMonths", () => {
@@ -36,6 +37,16 @@ describe("month helpers", () => {
     expect(monthLabel("2026-03")).toBe("March 2026")
     expect(shortMonthLabel("2026-03")).toBe("Mar")
     expect(shortMonthLabel("2026-01")).toBe("Jan '26")
+  })
+})
+
+describe("fixed English abbreviations", () => {
+  // ICU (en-GB) renders September as "Sept"; labels must stay three letters everywhere.
+  it("uses Sep, never Sept", () => {
+    expect(shortMonthLabel("2026-09")).toBe("Sep")
+    expect(mediumMonthLabel("2026-09")).toBe("Sep 2026")
+    expect(shortDate("2026-09-01")).toBe("1 Sep 2026")
+    expect(dayLabel("2026-09-12", "2026-09-26")).toBe("Sat, 12 Sep")
   })
 })
 

@@ -20,7 +20,7 @@ export function TagInput({ value, onChange, id }: { value: string[]; onChange: (
   }
 
   return (
-    <div className="space-y-2">
+    <div className="relative">
       <div
         className={cn(
           "border-input dark:bg-input/30 flex min-h-9 flex-wrap items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-colors",
@@ -72,7 +72,13 @@ export function TagInput({ value, onChange, id }: { value: string[]; onChange: (
         />
       </div>
       {focused && suggestions.length > 0 && (
-        <div id={listId} role="listbox" aria-label="Tag suggestions" className="flex flex-wrap gap-1.5">
+        // Overlay, not inline: an inline list vanishing on blur would shift the Save button out from under the tap.
+        <div
+          id={listId}
+          role="listbox"
+          aria-label="Tag suggestions"
+          className="bg-popover text-popover-foreground animate-in fade-in absolute inset-x-0 top-full z-30 mt-1.5 flex flex-wrap gap-1.5 rounded-lg border p-2 shadow-md"
+        >
           {suggestions.map((t) => (
             <button
               key={t.name}

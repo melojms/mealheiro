@@ -103,7 +103,7 @@ export default function AddPage() {
     <div className="mx-auto max-w-5xl">
       <PendingBanner />
 
-      <div className="grid gap-5 md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:gap-10">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:gap-10">
         <section aria-label="Amount" className="space-y-3 md:sticky md:top-8 md:self-start">
           <TypeSwitch value={type} onChange={changeType} />
           <AmountDisplay amount={amount} type={type} onClear={() => setAmount("")} />
