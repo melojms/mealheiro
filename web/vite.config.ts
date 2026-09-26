@@ -11,6 +11,19 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Stable, readable vendor chunks: React loads with the Add screen; charts only with Month/Charts.
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules[\\/](react|react-dom|scheduler|react-router|clsx)[\\/]/, priority: 20 },
+            { name: "charts", test: /node_modules[\\/](recharts|d3-[^\\/]+|victory-vendor|internmap|decimal\.js-light|@reduxjs|redux|immer|reselect|react-redux)[\\/]/, priority: 10 },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": "http://localhost:8080",

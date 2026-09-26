@@ -1,6 +1,10 @@
-import { NavLink, Outlet } from "react-router"
+import { Suspense, useEffect } from "react"
+import { NavLink, Outlet, useLocation } from "react-router"
 import { ChartColumn, CalendarDays, List, Plus, Settings, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { prefetchPages } from "@/pages/lazy"
+import { PageErrorBoundary } from "./PageErrorBoundary"
+import { PageSkeleton } from "./PageSkeleton"
 import { ThemeToggle } from "./ThemeToggle"
 
 const NAV = [
@@ -13,6 +17,8 @@ const NAV = [
 
 /** Phone: bottom tab bar. Desktop (md+): left sidebar. */
 export function AppLayout() {
+  useEffect(prefetchPages, [])
+  const { pathname } = useLocation()
   return (
     <div className="bg-background text-foreground min-h-svh md:flex">
       <aside className="bg-sidebar sticky top-0 hidden h-svh w-56 shrink-0 flex-col border-r p-3 md:flex">
@@ -45,7 +51,11 @@ export function AppLayout() {
       </aside>
 
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 pb-24 md:px-8 md:pt-8 md:pb-10">
-        <Outlet />
+        <PageErrorBoundary key={pathname}>
+          <Suspense fallback={<PageSkeleton />}>
+            <Outlet />
+          </Suspense>
+        </PageErrorBoundary>
       </main>
 
       <nav className="bg-background/90 fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">

@@ -5,10 +5,13 @@ import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppLayout } from "@/components/layout/AppLayout"
 import AddPage from "@/pages/AddPage"
-import MonthPage from "@/pages/MonthPage"
-import ChartsPage from "@/pages/ChartsPage"
-import EntriesPage from "@/pages/EntriesPage"
-import SettingsPage from "@/pages/SettingsPage"
+import { lazyPage } from "@/pages/lazy"
+
+// Add is the landing screen and ships in the main bundle; the rest (charts, dialogs) load on demand.
+const MonthPage = lazyPage(() => import("@/pages/MonthPage"))
+const ChartsPage = lazyPage(() => import("@/pages/ChartsPage"))
+const EntriesPage = lazyPage(() => import("@/pages/EntriesPage"))
+const SettingsPage = lazyPage(() => import("@/pages/SettingsPage"))
 
 // Data volume is tiny: after any mutation, call queryClient.invalidateQueries() (no args)
 // so every screen refetches.
