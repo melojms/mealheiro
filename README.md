@@ -28,12 +28,12 @@ There is no authentication. Run it on a trusted network (LAN or VPN).
 ## 🚀 Run with Docker
 
 ```sh
-cp .env.example .env        # adjust PORT, DATA_LOCATION, TZ
+cp .env.example .env        # adjust HOST_PORT, DATA_LOCATION, TZ
 mkdir -p data && sudo chown 65532:65532 data   # container runs as non-root 65532 (or set PUID/PGID)
 make up                     # docker compose up -d --build
 ```
 
-Open `http://<host>:8080`.
+Open `http://<host>:8080` (or your `HOST_PORT`).
 
 Behind a reverse proxy that uses an external Docker network called `proxy`, no port is published:
 
@@ -41,11 +41,12 @@ Behind a reverse proxy that uses an external Docker network called `proxy`, no p
 make up-proxy               # compose.yaml + compose.proxy.yaml
 ```
 
-Then point the proxy at `mealheiro:8080`.
+Then point the proxy at `mealheiro:$PORT` (`mealheiro:8080` by default).
 
 | Env | Default | |
 |---|---|---|
-| `PORT` | `8080` | Host port (base compose only) |
+| `HOST_PORT` | `8080` | Host port the app is published on (base compose only) |
+| `PORT` | `8080` | Port the server listens on inside the container (1-65535) |
 | `DATA_LOCATION` | `./data` | Host dir for `mealheiro.db` and `backups/` |
 | `PUID` / `PGID` | `65532` | User the container runs as. Must own `DATA_LOCATION` |
 | `TZ` | `Europe/Lisbon` | Defines "today" and recurring generation |

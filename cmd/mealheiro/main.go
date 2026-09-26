@@ -4,12 +4,13 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -41,7 +42,11 @@ func run() error {
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
 	slog.SetDefault(log)
 
-	addr := env("ADDR", ":8080")
+	port, err := parsePort(os.Getenv("PORT"))
+	if err != nil {
+		return err
+	}
+	addr := ":" + strconv.Itoa(port)
 	dataDir := env("DATA_DIR", "./data")
 	tz := env("TZ", "Europe/Lisbon")
 
@@ -116,12 +121,13 @@ func runDaily(ctx context.Context, log *slog.Logger, name string, fn func() erro
 
 // healthcheck probes the local /healthz endpoint (used by Docker; the image has no curl).
 func healthcheck() int {
-	port := strings.TrimPrefix(env("ADDR", ":8080"), ":")
-	if i := strings.LastIndex(port, ":"); i >= 0 {
-		port = port[i+1:]
+	port, err := parsePort(os.Getenv("PORT"))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
 	}
 	client := http.Client{Timeout: 3 * time.Second}
-	resp, err := client.Get("http://127.0.0.1:" + port + "/healthz")
+	resp, err := client.Get("http://127.0.0.1:" + strconv.Itoa(port) + "/healthz")
 	if err != nil {
 		return 1
 	}
@@ -130,6 +136,18 @@ func healthcheck() int {
 		return 1
 	}
 	return 0
+}
+
+// parsePort validates the PORT env var; empty means the default 8080.
+func parsePort(s string) (int, error) {
+	if s == "" {
+		return 8080, nil
+	}
+	p, err := strconv.Atoi(s)
+	if err != nil || p < 1 || p > 65535 {
+		return 0, fmt.Errorf("invalid PORT %q: must be an integer between 1 and 65535", s)
+	}
+	return p, nil
 }
 
 func env(key, def string) string {

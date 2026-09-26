@@ -3,7 +3,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 .PHONY: up up-proxy pull-up down logs build test test-go test-web generate fmt dev dev-api dev-web web e2e
 
-up: ## Build and start (publishes $$PORT)
+up: ## Build and start (publishes $$HOST_PORT)
 	mkdir -p $${DATA_LOCATION:-./data}
 	VERSION=$(VERSION) $(COMPOSE) up -d --build --force-recreate
 

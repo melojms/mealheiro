@@ -98,7 +98,7 @@ Date-range dialog + type filter. All entry types with a `type` column. Columns: 
 - Data dir `/data` (SQLite `mealheiro.db`).
 - Nightly backup: `VACUUM INTO /data/backups/mealheiro-YYYYMMDD.db`, keep last 30. Settings has "Download backup" (consistent snapshot `.db`).
 - `/healthz` endpoint (DB ping).
-- `compose.yaml`: publishes `${PORT:-8080}`, bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mealheiro`, non-root, `read_only: true`, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, healthcheck.
+- `compose.yaml`: publishes `${HOST_PORT:-8080}:${PORT:-8080}` (server listens on `PORT`, default 8080), bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mealheiro`, non-root, `read_only: true`, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, healthcheck.
 - `compose.proxy.yaml` override: joins external `proxy` network, removes the published port.
 - `.env.example`, Makefile (`up`, `down`, `logs`, `build`, `test`, `dev`, `generate`). Image `melojms/mealheiro:${VERSION}` built locally.
 
