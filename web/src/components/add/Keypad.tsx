@@ -20,7 +20,7 @@ export function Keypad({ onKey, className }: { onKey: (k: KeypadKey) => void; cl
             onKey("clear")
           }}
           className={cn(
-            "bg-muted/60 hover:bg-muted active:bg-accent flex h-12 items-center justify-center rounded-xl text-xl font-medium tabular-nums",
+            "bg-card ring-border/70 hover:bg-muted active:bg-accent flex shadow-xs ring-1 dark:bg-muted/60 dark:shadow-none dark:ring-0 h-12 items-center justify-center rounded-xl text-xl font-medium tabular-nums",
             "focus-visible:ring-ring/50 transition-transform outline-none select-none focus-visible:ring-3 active:scale-95 md:h-14",
             k === "backspace" && "text-muted-foreground",
           )}

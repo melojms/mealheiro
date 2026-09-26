@@ -16,8 +16,11 @@ export function AppLayout() {
   return (
     <div className="bg-background text-foreground min-h-svh md:flex">
       <aside className="bg-sidebar sticky top-0 hidden h-svh w-56 shrink-0 flex-col border-r p-3 md:flex">
-        <div className="flex items-center gap-2 px-2 py-3 text-lg font-semibold">
-          <Wallet className="text-primary size-5" /> mm-budget
+        <div className="flex items-center gap-2.5 px-2 py-3">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 text-white shadow-sm">
+            <Wallet className="size-4.5" />
+          </span>
+          <span className="text-lg font-semibold tracking-tight">mm-budget</span>
         </div>
         <nav className="mt-2 flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
