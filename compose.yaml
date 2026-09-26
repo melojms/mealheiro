@@ -10,10 +10,10 @@ services:
     user: "${PUID:-65532}:${PGID:-65532}"
     environment:
       TZ: ${TZ:-Europe/Lisbon}
-      PORT: ${PORT:-8080}
+      PORT: ${PORT:-7447}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "${HOST_PORT:-8080}:${PORT:-8080}"
+      - "${HOST_PORT:-7447}:${PORT:-7447}"
     volumes:
       - ${DATA_LOCATION:-./data}:/data
     read_only: true

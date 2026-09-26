@@ -33,7 +33,7 @@ mkdir -p data && sudo chown 65532:65532 data   # container runs as non-root 6553
 make up                     # docker compose up -d --build
 ```
 
-Open `http://<host>:8080` (or your `HOST_PORT`).
+Open `http://<host>:7447` (or your `HOST_PORT`).
 
 Behind a reverse proxy that uses an external Docker network called `proxy`, no port is published:
 
@@ -41,12 +41,12 @@ Behind a reverse proxy that uses an external Docker network called `proxy`, no p
 make up-proxy               # compose.yaml + compose.proxy.yaml
 ```
 
-Then point the proxy at `mealheiro:$PORT` (`mealheiro:8080` by default).
+Then point the proxy at `mealheiro:$PORT` (`mealheiro:7447` by default).
 
 | Env | Default | |
 |---|---|---|
-| `HOST_PORT` | `8080` | Host port the app is published on (base compose only) |
-| `PORT` | `8080` | Port the server listens on inside the container (1-65535) |
+| `HOST_PORT` | `7447` | Host port the app is published on (base compose only) |
+| `PORT` | `7447` | Port the server listens on inside the container (1-65535) |
 | `DATA_LOCATION` | `./data` | Host dir for `mealheiro.db` and `backups/` |
 | `PUID` / `PGID` | `65532` | User the container runs as. Must own `DATA_LOCATION` |
 | `TZ` | `Europe/Lisbon` | Defines "today" and recurring generation |
@@ -81,11 +81,11 @@ echo "$PAT" | docker login ghcr.io -u melojms --password-stdin
 Requirements: Go 1.27, Node 24, [sqlc](https://sqlc.dev), [gofumpt](https://github.com/mvdan/gofumpt).
 
 ```sh
-make dev-api     # Go API on :8080 (data in ./data)
-make dev-web     # Vite on :5173, proxies /api to :8080
+make dev-api     # Go API on :7447 (data in ./data)
+make dev-web     # Vite on :5173, proxies /api to :7447
 make test        # go test -race ./... + vitest
 make generate    # sqlc after editing internal/store/queries/*.sql
-make e2e         # Playwright smoke test (expects the app on :8080)
+make e2e         # Playwright smoke test (expects the app on :7447)
 ```
 
 ## 🗂️ Layout

@@ -12,7 +12,7 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? "line" : "list",
   use: {
-    baseURL: process.env.BASE_URL ?? "http://localhost:8080",
+    baseURL: process.env.BASE_URL ?? "http://localhost:7447",
     trace: "retain-on-failure",
   },
   projects: [{ name: "phone", use: { ...devices["Pixel 7"] } }],

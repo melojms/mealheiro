@@ -1,6 +1,6 @@
 // Fills a running mealheiro with ~12 months of realistic demo data through the public API.
-// Usage: node e2e/seed-demo.mjs [baseURL]   (default http://localhost:8080). Use on an empty DB only.
-const base = process.argv[2] ?? "http://localhost:8080"
+// Usage: node e2e/seed-demo.mjs [baseURL]   (default http://localhost:7447). Use on an empty DB only.
+const base = process.argv[2] ?? "http://localhost:7447"
 
 async function call(method, path, body) {
   const res = await fetch(base + path, {

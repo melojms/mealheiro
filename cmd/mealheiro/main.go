@@ -138,10 +138,10 @@ func healthcheck() int {
 	return 0
 }
 
-// parsePort validates the PORT env var; empty means the default 8080.
+// parsePort validates the PORT env var; empty means the default 7447.
 func parsePort(s string) (int, error) {
 	if s == "" {
-		return 8080, nil
+		return 7447, nil
 	}
 	p, err := strconv.Atoi(s)
 	if err != nil || p < 1 || p > 65535 {

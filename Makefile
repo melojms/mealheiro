@@ -41,10 +41,10 @@ generate:
 fmt:
 	gofumpt -w .
 
-dev-api: ## Go API on :8080 with data in ./data
+dev-api: ## Go API on :7447 with data in ./data
 	DATA_DIR=./data LOG_LEVEL=debug go run ./cmd/mealheiro
 
-dev-web: ## Vite dev server (proxies /api to :8080)
+dev-web: ## Vite dev server (proxies /api to :7447)
 	cd web && npm run dev
 
 e2e:
