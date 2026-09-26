@@ -7,6 +7,30 @@
 [![GHCR image](https://img.shields.io/badge/ghcr.io-melojms%2Fmealheiro-2496ED?logo=docker&logoColor=white)](https://github.com/melojms/mealheiro/pkgs/container/mealheiro)
 [![Go version](https://img.shields.io/github/go-mod/go-version/melojms/mealheiro)](go.mod)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/desktop-month-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/screenshots/desktop-month-light.png">
+  <img src="docs/screenshots/desktop-month-dark.png" alt="Month dashboard on desktop: income, expenses, investments, leftover and savings-rate cards, a spending donut by category, insights and the pending-bills inbox" width="100%">
+</picture>
+
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/screenshots/mobile-add.png" alt="Quick add on a phone: 42,50 € typed on the keypad with Groceries selected" width="200"><br><sub>Quick add</sub></td>
+    <td align="center" width="25%"><img src="docs/screenshots/mobile-month.png" alt="Month view on a phone: income, expenses, investments, leftover and savings-rate cards" width="200"><br><sub>Month at a glance</sub></td>
+    <td align="center" width="25%"><img src="docs/screenshots/mobile-budgets.png" alt="Pending bills to confirm with editable amounts, and budget progress bars" width="200"><br><sub>Confirm bills, track budgets</sub></td>
+    <td align="center" width="25%"><img src="docs/screenshots/mobile-charts.png" alt="12-month stacked bar chart of spending by category on a phone" width="200"><br><sub>12-month trends</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary>More desktop screenshots</summary>
+
+![Charts: spending by category over 12 months and income vs expenses](docs/screenshots/desktop-charts.png)
+![Entries filtered to one person's expenses, with category totals](docs/screenshots/desktop-entries.png)
+![Settings: monthly recurring templates, fixed and variable](docs/screenshots/desktop-recurring.png)
+
+</details>
+
 - ⚡ **Quick add**: type the amount, tap a category, save. The Add screen is the landing page.
 - 📅 **Month view**: income, expenses, investments, leftover and savings rate, a category breakdown you can drill into, and an inbox of pending recurring entries to confirm.
 - 📈 **Charts**: 12-month trends by category, income vs expenses vs savings, and year-over-year comparison.
@@ -104,6 +128,7 @@ make dev-web     # Vite on :5173, proxies /api to :7447
 make test        # go test -race ./... + vitest
 make generate    # sqlc after editing internal/store/queries/*.sql
 make e2e         # Playwright smoke test (expects the app on :7447)
+make screenshots # README screenshots into docs/screenshots (expects a demo seeded with e2e/seed-demo.mjs on :7447)
 ```
 
 ## 🗂️ Layout

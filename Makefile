@@ -1,7 +1,7 @@
 COMPOSE ?= docker compose
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
-.PHONY: up up-proxy pull-up down logs build test test-go test-web generate fmt dev dev-api dev-web web e2e
+.PHONY: up up-proxy pull-up down logs build test test-go test-web generate fmt dev dev-api dev-web web e2e screenshots
 
 up: ## Build and start (publishes $$HOST_PORT)
 	mkdir -p $${DATA_LOCATION:-./data}
@@ -49,3 +49,6 @@ dev-web: ## Vite dev server (proxies /api to :7447)
 
 e2e:
 	cd e2e && npx playwright test
+
+screenshots: ## README screenshots (needs a demo seeded with e2e/seed-demo.mjs on :7447)
+	cd e2e && node screenshots.mjs
