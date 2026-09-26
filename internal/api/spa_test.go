@@ -12,10 +12,12 @@ import (
 
 func spaTestFS() fstest.MapFS {
 	return fstest.MapFS{
-		"index.html":        {Data: []byte("<!doctype html><title>app</title>")},
-		"assets/app-1.js":   {Data: []byte(strings.Repeat("console.log('hi');", 200))},
-		"assets/font.woff2": {Data: []byte("wOF2binary")},
-		"favicon.svg":       {Data: []byte("<svg/>")},
+		"index.html":           {Data: []byte("<!doctype html><title>app</title>")},
+		"assets/app-1.js":      {Data: []byte(strings.Repeat("console.log('hi');", 200))},
+		"assets/font.woff2":    {Data: []byte("wOF2binary")},
+		"favicon.svg":          {Data: []byte("<svg/>")},
+		"sw.js":                {Data: []byte("self.addEventListener('fetch', () => {})")},
+		"manifest.webmanifest": {Data: []byte(`{"name":"Mealheiro"}`)},
 	}
 }
 
@@ -87,5 +89,51 @@ func TestSPAHandler(t *testing.T) {
 				t.Errorf("body %q does not contain %q", string(body), tt.wantBody)
 			}
 		})
+	}
+}
+
+func TestSPAHandlerPWAFiles(t *testing.T) {
+	h := spaHandler(spaTestFS())
+	for _, accept := range []string{"", "gzip"} {
+		t.Run("sw.js accept="+accept, func(t *testing.T) {
+			rec := spaGet(t, h, "/sw.js", accept)
+			if rec.Code != 200 {
+				t.Fatalf("status = %d", rec.Code)
+			}
+			for k, want := range map[string]string{
+				"Content-Type":           "text/javascript",
+				"Cache-Control":          "no-cache",
+				"Service-Worker-Allowed": "/",
+			} {
+				if got := rec.Header().Get(k); got != want {
+					t.Errorf("%s = %q, want %q", k, got, want)
+				}
+			}
+		})
+		t.Run("manifest accept="+accept, func(t *testing.T) {
+			rec := spaGet(t, h, "/manifest.webmanifest", accept)
+			if rec.Code != 200 {
+				t.Fatalf("status = %d", rec.Code)
+			}
+			if got := rec.Header().Get("Content-Type"); got != "application/manifest+json" {
+				t.Errorf("Content-Type = %q, want application/manifest+json", got)
+			}
+		})
+	}
+}
+
+func TestSPAHandlerPWAFilesNeverFallBack(t *testing.T) {
+	fsys := spaTestFS()
+	delete(fsys, "sw.js")
+	delete(fsys, "manifest.webmanifest")
+	h := spaHandler(fsys)
+	for _, p := range []string{"/sw.js", "/manifest.webmanifest"} {
+		if rec := spaGet(t, h, p, "gzip"); rec.Code != http.StatusNotFound {
+			t.Errorf("%s: status = %d, want 404 (not index.html)", p, rec.Code)
+		}
+	}
+	// Other unknown paths still get the SPA.
+	if rec := spaGet(t, h, "/offline", ""); rec.Code != 200 || !strings.Contains(rec.Body.String(), "<title>app</title>") {
+		t.Errorf("/offline: status %d body %q, want index.html", rec.Code, rec.Body.String())
 	}
 }

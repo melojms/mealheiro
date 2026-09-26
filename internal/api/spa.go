@@ -17,6 +17,15 @@ var compressible = map[string]bool{
 	".html": true, ".js": true, ".css": true, ".svg": true, ".json": true, ".webmanifest": true, ".txt": true,
 }
 
+func init() {
+	// Chrome's installability check wants the registered manifest type; Go has no default for it.
+	_ = mime.AddExtensionType(".webmanifest", "application/manifest+json")
+}
+
+// noFallback lists root files that must 404 when missing instead of getting
+// index.html: a service worker or manifest that parses as HTML breaks installs.
+var noFallback = map[string]bool{"sw.js": true, "manifest.webmanifest": true}
+
 // spaHandler serves static files from fsys and falls back to index.html for
 // client-side routes. Hashed assets are cached aggressively; text files are
 // gzipped (once, then kept in memory) for clients that accept it.
@@ -31,7 +40,7 @@ func spaHandler(fsys fs.FS) http.Handler {
 		if _, err := fs.Stat(fsys, p); err != nil {
 			// A stale tab asking for a chunk from a previous build must get a 404, not HTML,
 			// so the client can detect it and reload.
-			if strings.HasPrefix(p, "assets/") {
+			if strings.HasPrefix(p, "assets/") || noFallback[p] {
 				http.NotFound(w, r)
 				return
 			}
@@ -42,6 +51,10 @@ func spaHandler(fsys fs.FS) http.Handler {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		} else {
 			w.Header().Set("Cache-Control", "no-cache")
+		}
+		if p == "sw.js" {
+			w.Header().Set("Content-Type", "text/javascript")
+			w.Header().Set("Service-Worker-Allowed", "/")
 		}
 
 		ext := path.Ext(p)
@@ -59,11 +72,9 @@ func spaHandler(fsys fs.FS) http.Handler {
 			files.ServeHTTP(w, r)
 			return
 		}
-		ctype := mime.TypeByExtension(ext)
-		if ext == ".webmanifest" {
-			ctype = "application/manifest+json"
+		if w.Header().Get("Content-Type") == "" {
+			w.Header().Set("Content-Type", mime.TypeByExtension(ext))
 		}
-		w.Header().Set("Content-Type", ctype)
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Content-Length", strconv.Itoa(len(gz)))
 		if r.Method == http.MethodHead {
