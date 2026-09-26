@@ -1,11 +1,11 @@
 services:
-  mm-budget:
-    image: melojms/mm-budget:${VERSION:-latest}
+  mealheiro:
+    image: melojms/mealheiro:${VERSION:-latest}
     build:
       context: .
       args:
         VERSION: ${VERSION:-dev}
-    container_name: mm-budget
+    container_name: mealheiro
     restart: unless-stopped
     user: "${PUID:-65532}:${PGID:-65532}"
     environment:
@@ -21,7 +21,7 @@ services:
     tmpfs:
       - /tmp
     healthcheck:
-      test: ["CMD", "/mm-budget", "healthcheck"]
+      test: ["CMD", "/mealheiro", "healthcheck"]
       interval: 30s
       timeout: 3s
       start_period: 10s

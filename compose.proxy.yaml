@@ -1,7 +1,7 @@
 # Homelab override: attach to the reverse proxy's external network and don't publish a port.
 #   docker compose -f compose.yaml -f compose.proxy.yaml up -d
 services:
-  mm-budget:
+  mealheiro:
     ports: !reset []
     networks: [proxy]
 

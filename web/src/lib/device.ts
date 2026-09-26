@@ -1,7 +1,7 @@
 // Per-device preferences stored in localStorage (never shared between devices).
 import { useSyncExternalStore } from "react"
 
-const PAYER_KEY = "mm-budget.default-payer"
+const PAYER_KEY = "mealheiro.default-payer"
 const listeners = new Set<() => void>()
 
 function read(): number | null {

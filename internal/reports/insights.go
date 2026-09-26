@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/melojms/mm-budget/internal/clock"
+	"github.com/melojms/mealheiro/internal/clock"
 )
 
 // Insight thresholds (docs/API.md "Insights").

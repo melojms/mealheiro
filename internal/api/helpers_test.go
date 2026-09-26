@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // testNow is the frozen "now" for API tests: 2026-03-15 12:00 Europe/Lisbon.

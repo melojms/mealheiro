@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/melojms/mm-budget/internal/backup"
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/export"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/backup"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/export"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Bounds used when the export range is open-ended (dates compare as strings).
@@ -73,7 +73,7 @@ func (s *Server) handleExportCSV(w http.ResponseWriter, r *http.Request) {
 		s.internalError(w, r, err)
 		return
 	}
-	name := fmt.Sprintf("mm-budget_%s_%s.csv", cmp.Or(from, "all"), cmp.Or(to, "all"))
+	name := fmt.Sprintf("mealheiro_%s_%s.csv", cmp.Or(from, "all"), cmp.Or(to, "all"))
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
 	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
@@ -125,7 +125,7 @@ func (s *Server) handleBackup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := "mm-budget-" + s.Clock.Now().Format("20060102-150405") + ".db"
+	name := "mealheiro-" + s.Clock.Now().Format("20060102-150405") + ".db"
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
 	w.Header().Set("Content-Length", strconv.FormatInt(info.Size(), 10))
@@ -144,5 +144,5 @@ func (s *Server) backupTempDir() (string, error) {
 			}
 		}
 	}
-	return os.MkdirTemp("", "mm-budget-download-*")
+	return os.MkdirTemp("", "mealheiro-download-*")
 }

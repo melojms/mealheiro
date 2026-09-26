@@ -26,13 +26,13 @@ func Snapshot(ctx context.Context, db *sql.DB, dst string) error {
 	return nil
 }
 
-// Nightly writes dir/mm-budget-YYYYMMDD.db for today (if missing) and keeps
+// Nightly writes dir/mealheiro-YYYYMMDD.db for today (if missing) and keeps
 // only the newest keep snapshots.
 func Nightly(ctx context.Context, db *sql.DB, dir, today string, keep int) error {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return fmt.Errorf("create backup dir: %w", err)
 	}
-	name := filepath.Join(dir, "mm-budget-"+strings.ReplaceAll(today, "-", "")+".db")
+	name := filepath.Join(dir, "mealheiro-"+strings.ReplaceAll(today, "-", "")+".db")
 	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
 		// Write to a hidden temp name first so a crash never leaves a partial
 		// file that would be mistaken for today's backup.
@@ -52,12 +52,12 @@ func Nightly(ctx context.Context, db *sql.DB, dir, today string, keep int) error
 	return prune(dir, keep)
 }
 
-// prune deletes all but the newest keep mm-budget-*.db files (names sort by date).
+// prune deletes all but the newest keep mealheiro-*.db files (names sort by date).
 func prune(dir string, keep int) error {
 	if keep <= 0 {
 		return nil
 	}
-	files, err := filepath.Glob(filepath.Join(dir, "mm-budget-*.db"))
+	files, err := filepath.Glob(filepath.Join(dir, "mealheiro-*.db"))
 	if err != nil {
 		return err
 	}

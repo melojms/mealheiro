@@ -21,7 +21,7 @@ export const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="mm-budget.theme">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="mealheiro.theme">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <BrowserRouter>

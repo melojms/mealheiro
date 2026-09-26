@@ -26,7 +26,7 @@ export function AppLayout() {
           <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 text-white shadow-sm">
             <Wallet className="size-4.5" />
           </span>
-          <span className="text-lg font-semibold tracking-tight">mm-budget</span>
+          <span className="text-lg font-semibold tracking-tight">Mealheiro</span>
         </div>
         <nav className="mt-2 flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (

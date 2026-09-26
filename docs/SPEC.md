@@ -1,4 +1,4 @@
-# mm-budget — Specification
+# Mealheiro — Specification
 
 Household budget web app for two people (+ a joint account). Goal: see where money goes, optimize month by month, save as much as possible. Runs self-hosted via Docker on a home server; reached over LAN/VPN. No authentication (for now).
 
@@ -95,12 +95,12 @@ Date-range dialog + type filter. All entry types with a `type` column. Columns: 
 
 ## 6. Operations
 
-- Data dir `/data` (SQLite `mm-budget.db`).
-- Nightly backup: `VACUUM INTO /data/backups/mm-budget-YYYYMMDD.db`, keep last 30. Settings has "Download backup" (consistent snapshot `.db`).
+- Data dir `/data` (SQLite `mealheiro.db`).
+- Nightly backup: `VACUUM INTO /data/backups/mealheiro-YYYYMMDD.db`, keep last 30. Settings has "Download backup" (consistent snapshot `.db`).
 - `/healthz` endpoint (DB ping).
-- `compose.yaml`: publishes `${PORT:-8080}`, bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mm-budget`, non-root, `read_only: true`, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, healthcheck.
+- `compose.yaml`: publishes `${PORT:-8080}`, bind-mounts `${DATA_LOCATION:-./data}:/data`, `restart: unless-stopped`, `container_name: mealheiro`, non-root, `read_only: true`, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, healthcheck.
 - `compose.proxy.yaml` override: joins external `proxy` network, removes the published port.
-- `.env.example`, Makefile (`up`, `down`, `logs`, `build`, `test`, `dev`, `generate`). Image `melojms/mm-budget:${VERSION}` built locally.
+- `.env.example`, Makefile (`up`, `down`, `logs`, `build`, `test`, `dev`, `generate`). Image `melojms/mealheiro:${VERSION}` built locally.
 
 ## 7. Out of scope (MVP)
 

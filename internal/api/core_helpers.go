@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // coreMaxNameLen caps person, category and tag names (in characters).

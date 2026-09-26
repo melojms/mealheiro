@@ -1,4 +1,4 @@
-# mm-budget
+# Mealheiro
 
 Household budget app for two people and a joint account. Log expenses in seconds from your phone, then see where the money goes, month by month.
 
@@ -28,17 +28,17 @@ Behind a reverse proxy that uses an external Docker network called `proxy`, no p
 make up-proxy               # compose.yaml + compose.proxy.yaml
 ```
 
-Then point the proxy at `mm-budget:8080`.
+Then point the proxy at `mealheiro:8080`.
 
 | Env | Default | |
 |---|---|---|
 | `PORT` | `8080` | Host port (base compose only) |
-| `DATA_LOCATION` | `./data` | Host dir for `mm-budget.db` and `backups/` |
+| `DATA_LOCATION` | `./data` | Host dir for `mealheiro.db` and `backups/` |
 | `PUID` / `PGID` | `65532` | User the container runs as. Must own `DATA_LOCATION` |
 | `TZ` | `Europe/Lisbon` | Defines "today" and recurring generation |
 | `LOG_LEVEL` | `info` | `debug` logs every request |
 
-To restore a backup, stop the app and replace `data/mm-budget.db` with a snapshot from `data/backups/`. Then start it again.
+To restore a backup, stop the app and replace `data/mealheiro.db` with a snapshot from `data/backups/`. Then start it again.
 
 ## Develop
 
@@ -55,7 +55,7 @@ make e2e         # Playwright smoke test (expects the app on :8080)
 Layout:
 
 ```
-cmd/mm-budget        main: HTTP server, recurring + backup jobs, healthcheck subcommand
+cmd/mealheiro        main: HTTP server, recurring + backup jobs, healthcheck subcommand
 internal/api         JSON API (docs/API.md) + SPA serving
 internal/store       SQLite, goose migrations (embedded), sqlc queries
 internal/recurring   monthly template generation

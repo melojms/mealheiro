@@ -44,11 +44,11 @@ func TestExportCSV(t *testing.T) {
 	tests := []struct {
 		name, query, filename, body string
 	}{
-		{"everything", "", "mm-budget_all_all.csv", income + mortgage + groceries + etf},
-		{"date range", "?from=2026-03-01&to=2026-03-31", "mm-budget_2026-03-01_2026-03-31.csv", mortgage + groceries},
-		{"open start", "?to=2026-03-01", "mm-budget_all_2026-03-01.csv", income + mortgage},
-		{"types", "?types=income,investment", "mm-budget_all_all.csv", income + etf},
-		{"empty range", "?from=2030-01-01", "mm-budget_2030-01-01_all.csv", ""},
+		{"everything", "", "mealheiro_all_all.csv", income + mortgage + groceries + etf},
+		{"date range", "?from=2026-03-01&to=2026-03-31", "mealheiro_2026-03-01_2026-03-31.csv", mortgage + groceries},
+		{"open start", "?to=2026-03-01", "mealheiro_all_2026-03-01.csv", income + mortgage},
+		{"types", "?types=income,investment", "mealheiro_all_all.csv", income + etf},
+		{"empty range", "?from=2030-01-01", "mealheiro_2030-01-01_all.csv", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -90,7 +90,7 @@ func TestBackupDownload(t *testing.T) {
 	if ct := rec.Header().Get("Content-Type"); ct != "application/octet-stream" {
 		t.Errorf("content-type = %s", ct)
 	}
-	if cd := rec.Header().Get("Content-Disposition"); cd != `attachment; filename="mm-budget-20260315-120000.db"` {
+	if cd := rec.Header().Get("Content-Disposition"); cd != `attachment; filename="mealheiro-20260315-120000.db"` {
 		t.Errorf("disposition = %s", cd)
 	}
 	if !strings.HasPrefix(rec.Body.String(), "SQLite format 3\x00") {

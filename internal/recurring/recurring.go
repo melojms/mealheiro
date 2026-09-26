@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Generate creates entries for every active template for each month from the

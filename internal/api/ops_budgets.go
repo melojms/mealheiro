@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Overall cap presentation (docs/API.md "BudgetLine").

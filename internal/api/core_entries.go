@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 const (

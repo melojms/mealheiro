@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/reports"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/reports"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // parsePayer parses the optional payer_id filter. Unknown or malformed ids are

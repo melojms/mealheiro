@@ -3,7 +3,7 @@ package reports
 import (
 	"slices"
 
-	"github.com/melojms/mm-budget/internal/clock"
+	"github.com/melojms/mealheiro/internal/clock"
 )
 
 // GeneralSubcategory names the pseudo-subcategory for entries booked on a parent.

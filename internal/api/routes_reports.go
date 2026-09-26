@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/reports"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/reports"
 )
 
 // Limits of the trends window.

@@ -1,6 +1,6 @@
 {
-  "name": "mm-budget",
-  "short_name": "Budget",
+  "name": "Mealheiro",
+  "short_name": "Mealheiro",
   "description": "Household budget: where our money goes.",
   "start_url": "/",
   "scope": "/",

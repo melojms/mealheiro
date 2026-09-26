@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 var lisbon = func() *time.Location {

@@ -1,4 +1,4 @@
-// Command mm-budget runs the household budget web app.
+// Command mealheiro runs the household budget web app.
 package main
 
 import (
@@ -13,12 +13,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/melojms/mm-budget/internal/api"
-	"github.com/melojms/mm-budget/internal/backup"
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/recurring"
-	"github.com/melojms/mm-budget/internal/store"
-	"github.com/melojms/mm-budget/web"
+	"github.com/melojms/mealheiro/internal/api"
+	"github.com/melojms/mealheiro/internal/backup"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/recurring"
+	"github.com/melojms/mealheiro/internal/store"
+	"github.com/melojms/mealheiro/web"
 )
 
 const backupsToKeep = 30
@@ -54,7 +54,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	db, err := store.Open(ctx, filepath.Join(dataDir, "mm-budget.db"))
+	db, err := store.Open(ctx, filepath.Join(dataDir, "mealheiro.db"))
 	if err != nil {
 		return err
 	}

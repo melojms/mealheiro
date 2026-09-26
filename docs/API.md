@@ -1,4 +1,4 @@
-# mm-budget — HTTP API contract
+# Mealheiro — HTTP API contract
 
 Source of truth for backend and frontend. Frontend types live in `web/src/lib/types.ts` and must match this file.
 
@@ -153,10 +153,10 @@ Effective budget for month M = row with greatest `effective_from <= M` for that 
 
 | Method & path | Response |
 |---|---|
-| `GET /api/export.csv?from=&to=&types=expense,income,investment` | `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="mm-budget_<from>_<to>.csv"`. UTF-8 BOM, `;` separator, CRLF, header `date;type;category;subcategory;amount;payer;note;tags;recurring;status`. `category` = top-level name, `subcategory` = leaf name or empty. `amount` decimal comma `12,50`. `tags` joined with `,`. `recurring` `yes`/`no`. Date asc. Fields quoted per RFC 4180 when needed. Missing from/to = unbounded. |
-| `GET /api/backup` | `application/octet-stream`, `Content-Disposition: attachment; filename="mm-budget-<YYYYMMDD-HHMMSS>.db"`: consistent `VACUUM INTO` snapshot streamed then deleted. |
+| `GET /api/export.csv?from=&to=&types=expense,income,investment` | `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="mealheiro_<from>_<to>.csv"`. UTF-8 BOM, `;` separator, CRLF, header `date;type;category;subcategory;amount;payer;note;tags;recurring;status`. `category` = top-level name, `subcategory` = leaf name or empty. `amount` decimal comma `12,50`. `tags` joined with `,`. `recurring` `yes`/`no`. Date asc. Fields quoted per RFC 4180 when needed. Missing from/to = unbounded. |
+| `GET /api/backup` | `application/octet-stream`, `Content-Disposition: attachment; filename="mealheiro-<YYYYMMDD-HHMMSS>.db"`: consistent `VACUUM INTO` snapshot streamed then deleted. |
 
-Nightly: `backup.Nightly` writes `<DATA_DIR>/backups/mm-budget-YYYYMMDD.db` once per day and keeps the newest 30.
+Nightly: `backup.Nightly` writes `<DATA_DIR>/backups/mealheiro-YYYYMMDD.db` once per day and keeps the newest 30.
 
 ## Reports  *(owner: be-reports)*
 

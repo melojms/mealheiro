@@ -3,7 +3,7 @@ package api
 import (
 	"strings"
 
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Entry is the JSON shape of an entry (docs/API.md "Entry").

@@ -11,7 +11,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 func countPeople(t *testing.T, path string) int {
@@ -62,7 +62,7 @@ func TestNightly(t *testing.T) {
 	if err := Nightly(t.Context(), db, dir, "2026-03-15", 3); err != nil {
 		t.Fatal(err)
 	}
-	today := filepath.Join(dir, "mm-budget-20260315.db")
+	today := filepath.Join(dir, "mealheiro-20260315.db")
 	if n := countPeople(t, today); n != 3 {
 		t.Fatalf("people = %d", n)
 	}
@@ -77,8 +77,8 @@ func TestNightly(t *testing.T) {
 		t.Fatal("today's backup was rewritten")
 	}
 
-	// Older snapshots plus unrelated files; only mm-budget-*.db are pruned.
-	for _, name := range []string{"mm-budget-20260101.db", "mm-budget-20260201.db", "mm-budget-20260301.db", "notes.txt"} {
+	// Older snapshots plus unrelated files; only mealheiro-*.db are pruned.
+	for _, name := range []string{"mealheiro-20260101.db", "mealheiro-20260201.db", "mealheiro-20260301.db", "notes.txt"} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte("x"), 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -86,7 +86,7 @@ func TestNightly(t *testing.T) {
 	if err := Nightly(t.Context(), db, dir, "2026-03-16", 3); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"mm-budget-20260301.db", "mm-budget-20260315.db", "mm-budget-20260316.db", "notes.txt"}
+	want := []string{"mealheiro-20260301.db", "mealheiro-20260315.db", "mealheiro-20260316.db", "notes.txt"}
 	if got := listDir(t, dir); !slices.Equal(got, want) {
 		t.Fatalf("dir = %v, want %v", got, want)
 	}

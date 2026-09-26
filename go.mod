@@ -1,4 +1,4 @@
-module github.com/melojms/mm-budget
+module github.com/melojms/mealheiro
 
 go 1.27.1
 

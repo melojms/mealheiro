@@ -15,12 +15,12 @@ RUN go mod download
 COPY . .
 COPY --from=web /src/web/dist ./web/dist
 ARG VERSION=dev
-RUN go build -trimpath -ldflags "-s -w -X github.com/melojms/mm-budget/internal/api.Version=${VERSION}" -o /out/mm-budget ./cmd/mm-budget
+RUN go build -trimpath -ldflags "-s -w -X github.com/melojms/mealheiro/internal/api.Version=${VERSION}" -o /out/mealheiro ./cmd/mealheiro
 
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=build /out/mm-budget /mm-budget
+COPY --from=build /out/mealheiro /mealheiro
 ENV DATA_DIR=/data ADDR=:8080 TZ=Europe/Lisbon
 EXPOSE 8080
 USER nonroot:nonroot
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD ["/mm-budget", "healthcheck"]
-ENTRYPOINT ["/mm-budget"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD ["/mealheiro", "healthcheck"]
+ENTRYPOINT ["/mealheiro"]

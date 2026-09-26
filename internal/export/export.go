@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/melojms/mm-budget/internal/money"
+	"github.com/melojms/mealheiro/internal/money"
 )
 
 // bom marks the file as UTF-8 for spreadsheet apps.

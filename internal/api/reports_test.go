@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/melojms/mm-budget/internal/reports"
+	"github.com/melojms/mealheiro/internal/reports"
 )
 
 // seedReports inserts several months of entries (now = 2026-03-15):

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // coreNormalizeTags lowercases, trims, dedupes and sorts tags, dropping empties.

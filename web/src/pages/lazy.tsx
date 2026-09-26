@@ -4,7 +4,7 @@ type Loader = () => Promise<{ default: ComponentType }>
 
 const loaders: Loader[] = []
 
-const RELOAD_KEY = "mm-budget.chunk-reload"
+const RELOAD_KEY = "mealheiro.chunk-reload"
 
 /**
  * React.lazy that also registers the chunk for idle prefetching (see prefetchPages).

@@ -12,8 +12,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/melojms/mm-budget/internal/clock"
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/clock"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Version is set at build time via -ldflags.

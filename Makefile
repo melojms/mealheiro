@@ -17,7 +17,7 @@ logs:
 	$(COMPOSE) logs -f
 
 build: web
-	CGO_ENABLED=0 go build -ldflags "-X github.com/melojms/mm-budget/internal/api.Version=$(VERSION)" -o bin/mm-budget ./cmd/mm-budget
+	CGO_ENABLED=0 go build -ldflags "-X github.com/melojms/mealheiro/internal/api.Version=$(VERSION)" -o bin/mealheiro ./cmd/mealheiro
 
 web:
 	cd web && npm ci && npm run build
@@ -37,7 +37,7 @@ fmt:
 	gofumpt -w .
 
 dev-api: ## Go API on :8080 with data in ./data
-	DATA_DIR=./data LOG_LEVEL=debug go run ./cmd/mm-budget
+	DATA_DIR=./data LOG_LEVEL=debug go run ./cmd/mealheiro
 
 dev-web: ## Vite dev server (proxies /api to :8080)
 	cd web && npm run dev

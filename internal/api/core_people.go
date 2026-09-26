@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/melojms/mm-budget/internal/store"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 func (s *Server) handleListPeople(w http.ResponseWriter, r *http.Request) {
