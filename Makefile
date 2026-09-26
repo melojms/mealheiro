@@ -1,7 +1,7 @@
 COMPOSE ?= docker compose
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
-.PHONY: up up-proxy down logs build test test-go test-web generate fmt dev dev-api dev-web web e2e
+.PHONY: up up-proxy pull-up down logs build test test-go test-web generate fmt dev dev-api dev-web web e2e
 
 up: ## Build and start (publishes $$PORT)
 	mkdir -p $${DATA_LOCATION:-./data}
@@ -9,6 +9,11 @@ up: ## Build and start (publishes $$PORT)
 
 up-proxy: ## Build and start on the external "proxy" network (homelab)
 	VERSION=$(VERSION) $(COMPOSE) -f compose.yaml -f compose.proxy.yaml up -d --build --force-recreate
+
+pull-up: ## Pull the released image from GHCR and start (no local build)
+	mkdir -p $${DATA_LOCATION:-./data}
+	$(COMPOSE) pull
+	$(COMPOSE) up -d --no-build
 
 down:
 	$(COMPOSE) down

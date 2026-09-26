@@ -1,6 +1,6 @@
 services:
   mealheiro:
-    image: melojms/mealheiro:${VERSION:-latest}
+    image: ghcr.io/melojms/mealheiro:${VERSION:-latest}
     build:
       context: .
       args:

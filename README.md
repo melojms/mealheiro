@@ -40,6 +40,28 @@ Then point the proxy at `mealheiro:8080`.
 
 To restore a backup, stop the app and replace `data/mealheiro.db` with a snapshot from `data/backups/`. Then start it again.
 
+## Releases & deploy
+
+Every merge to `main` runs [`.github/workflows/release.yml`](.github/workflows/release.yml): tests, then a `vX.Y.Z` tag, a GitHub Release with generated notes, and an image on GHCR.
+
+- **Version**: computed from conventional commits since the last tag. `feat` bumps minor, breaking (`!` or `BREAKING CHANGE:`) bumps major (minor while on 0.x), anything else bumps patch. The first release is `v0.1.0`.
+- **Image tags**: `ghcr.io/melojms/mealheiro:X.Y.Z`, `:X.Y`, `:latest`, `:sha-<short>`.
+
+On the homelab server:
+
+```sh
+# .env: VERSION=0.1.0 to pin a release, or VERSION=latest
+make pull-up                # docker compose pull && up -d (no local build)
+```
+
+The GHCR package is private by default. Either make it public (package settings, "Change visibility"), or log in once on the server with a PAT that has `read:packages`:
+
+```sh
+echo "$PAT" | docker login ghcr.io -u melojms --password-stdin
+```
+
+`make up` still builds the image locally from source.
+
 ## Develop
 
 Requirements: Go 1.27, Node 24, [sqlc](https://sqlc.dev), [gofumpt](https://github.com/mvdan/gofumpt).
