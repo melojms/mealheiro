@@ -1,7 +1,7 @@
 // Typed client for docs/API.md. All functions throw ApiError on non-2xx.
 import type {
   BudgetStatus, Budgets, Category, Entry, EntryFilters, EntryInput, EntryList, EntryType, Insight,
-  Meta, MonthReport, PendingEntry, Person, TagCount, Template, TemplateInput, TrendsReport, YearReport,
+  Meta, MonthReport, PendingEntry, Person, SharedReport, TagCount, Template, TemplateInput, TrendsReport, YearReport,
 } from "./types"
 
 export class ApiError extends Error {
@@ -88,6 +88,8 @@ export const api = {
   yearReport: (year?: number, payer_id?: number) =>
     request<YearReport>("GET", `/api/reports/year${qs({ year, payer_id })}`),
   years: () => request<number[]>("GET", "/api/reports/years"),
+  sharedReport: (p: { month: string } | { year: number }) =>
+    request<SharedReport>("GET", `/api/reports/shared${qs(p)}`),
   insights: (month?: string, payer_id?: number) =>
     request<Insight[]>("GET", `/api/insights${qs({ month, payer_id })}`),
 

@@ -15,6 +15,8 @@ import { ConfirmDialog } from "./ConfirmDialog"
 import { DateChips } from "./DateChips"
 import { useCategories, usePeople, useToday } from "./hooks"
 import { PayerChips } from "./PayerChips"
+import { PersonalChip } from "./PersonalChip"
+import { canBePersonal } from "./personal"
 import { ResponsiveDialog } from "./ResponsiveDialog"
 import { TagInput } from "./TagInput"
 import { TypeSwitch } from "./TypeSwitch"
@@ -51,6 +53,7 @@ function EditForm({ entry, open, onOpenChange }: { entry: Entry } & Omit<EntryEd
   const [categoryId, setCategoryId] = useState<number | null>(entry.category_id)
   const [date, setDate] = useState(entry.date)
   const [payerId, setPayerId] = useState(entry.payer_id)
+  const [personal, setPersonal] = useState(entry.personal)
   const [note, setNote] = useState(entry.note)
   const [tags, setTags] = useState(entry.tags)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -63,9 +66,11 @@ function EditForm({ entry, open, onOpenChange }: { entry: Entry } & Omit<EntryEd
   const amountInvalid = amount.trim() !== "" && (cents === null || cents <= 0)
   const valid = cents !== null && cents > 0 && categoryId !== null
   const pending = entry.status === "pending"
+  const personalAllowed = canBePersonal(type, people.find((p) => p.id === payerId))
 
   const input = (): EntryInput => ({
-    type, date, amount_cents: cents!, category_id: categoryId!, payer_id: payerId, note: note.trim(), tags,
+    type, date, amount_cents: cents!, category_id: categoryId!, payer_id: payerId,
+    personal: personalAllowed && personal, note: note.trim(), tags,
   })
 
   const done = (message: string) => {
@@ -160,7 +165,10 @@ function EditForm({ entry, open, onOpenChange }: { entry: Entry } & Omit<EntryEd
 
           <div className="space-y-1.5">
             <Label>Paid by</Label>
-            <PayerChips people={people} value={payerId} onChange={setPayerId} />
+            <div className="flex flex-wrap items-center gap-2">
+              <PayerChips people={people} value={payerId} onChange={setPayerId} />
+              {personalAllowed && <PersonalChip value={personal} onChange={setPersonal} />}
+            </div>
           </div>
 
           <div className="space-y-1.5">

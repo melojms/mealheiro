@@ -14,7 +14,7 @@ import (
 const bom = "\xef\xbb\xbf"
 
 // Header is the fixed CSV header row.
-var Header = []string{"date", "type", "category", "subcategory", "amount", "payer", "note", "tags", "recurring", "status"}
+var Header = []string{"date", "type", "category", "subcategory", "amount", "payer", "note", "tags", "recurring", "status", "personal"}
 
 // Row is one exported entry.
 type Row struct {
@@ -28,6 +28,7 @@ type Row struct {
 	Tags        []string
 	Recurring   bool
 	Status      string
+	Personal    bool
 }
 
 // Write writes the BOM, header and rows to w.
@@ -42,17 +43,20 @@ func Write(w io.Writer, rows []Row) error {
 		return err
 	}
 	for _, r := range rows {
-		recurring := "no"
-		if r.Recurring {
-			recurring = "yes"
-		}
 		if err := cw.Write([]string{
 			r.Date, r.Type, r.Category, r.Subcategory, money.Decimal(r.AmountCents),
-			r.Payer, r.Note, strings.Join(r.Tags, ","), recurring, r.Status,
+			r.Payer, r.Note, strings.Join(r.Tags, ","), yesNo(r.Recurring), r.Status, yesNo(r.Personal),
 		}); err != nil {
 			return err
 		}
 	}
 	cw.Flush()
 	return cw.Error()
+}
+
+func yesNo(b bool) string {
+	if b {
+		return "yes"
+	}
+	return "no"
 }

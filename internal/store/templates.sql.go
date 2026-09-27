@@ -10,8 +10,8 @@ import (
 )
 
 const createTemplate = `-- name: CreateTemplate :one
-INSERT INTO templates (type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO templates (type, category_id, payer_id, personal, amount_cents, variable, note, start_month, end_month, active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id
 `
 
@@ -19,6 +19,7 @@ type CreateTemplateParams struct {
 	Type        string
 	CategoryID  int64
 	PayerID     int64
+	Personal    bool
 	AmountCents int64
 	Variable    bool
 	Note        string
@@ -32,6 +33,7 @@ func (q *Queries) CreateTemplate(ctx context.Context, arg CreateTemplateParams) 
 		arg.Type,
 		arg.CategoryID,
 		arg.PayerID,
+		arg.Personal,
 		arg.AmountCents,
 		arg.Variable,
 		arg.Note,
@@ -57,7 +59,7 @@ func (q *Queries) DeleteTemplate(ctx context.Context, id int64) (int64, error) {
 }
 
 const getTemplate = `-- name: GetTemplate :one
-SELECT id, type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active, created_at, updated_at FROM templates WHERE id = ?
+SELECT id, type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active, created_at, updated_at, personal FROM templates WHERE id = ?
 `
 
 func (q *Queries) GetTemplate(ctx context.Context, id int64) (Template, error) {
@@ -76,6 +78,7 @@ func (q *Queries) GetTemplate(ctx context.Context, id int64) (Template, error) {
 		&i.Active,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Personal,
 	)
 	return i, err
 }
@@ -101,8 +104,8 @@ func (q *Queries) GetTemplateCategory(ctx context.Context, id int64) (Category, 
 }
 
 const insertGeneratedEntry = `-- name: InsertGeneratedEntry :exec
-INSERT INTO entries (type, date, amount_cents, category_id, payer_id, note, status, template_id, template_month)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO entries (type, date, amount_cents, category_id, payer_id, personal, note, status, template_id, template_month)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertGeneratedEntryParams struct {
@@ -111,6 +114,7 @@ type InsertGeneratedEntryParams struct {
 	AmountCents   int64
 	CategoryID    int64
 	PayerID       int64
+	Personal      bool
 	Note          string
 	Status        string
 	TemplateID    *int64
@@ -124,6 +128,7 @@ func (q *Queries) InsertGeneratedEntry(ctx context.Context, arg InsertGeneratedE
 		arg.AmountCents,
 		arg.CategoryID,
 		arg.PayerID,
+		arg.Personal,
 		arg.Note,
 		arg.Status,
 		arg.TemplateID,
@@ -158,7 +163,7 @@ func (q *Queries) LatestTemplateEntryAmount(ctx context.Context, templateID *int
 }
 
 const listActiveTemplates = `-- name: ListActiveTemplates :many
-SELECT id, type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active, created_at, updated_at FROM templates WHERE active ORDER BY id
+SELECT id, type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active, created_at, updated_at, personal FROM templates WHERE active ORDER BY id
 `
 
 func (q *Queries) ListActiveTemplates(ctx context.Context) ([]Template, error) {
@@ -183,6 +188,7 @@ func (q *Queries) ListActiveTemplates(ctx context.Context) ([]Template, error) {
 			&i.Active,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Personal,
 		); err != nil {
 			return nil, err
 		}
@@ -232,6 +238,7 @@ SELECT t.id,
        coalesce(pc.name, '')                                                                AS parent_category_name, -- '' when top-level
        t.payer_id,
        p.name                                                                              AS payer_name,
+       t.personal,
        t.amount_cents,
        t.variable,
        t.note,
@@ -254,6 +261,7 @@ type ListTemplateViewsRow struct {
 	ParentCategoryName string
 	PayerID            int64
 	PayerName          string
+	Personal           bool
 	AmountCents        int64
 	Variable           bool
 	Note               string
@@ -280,6 +288,7 @@ func (q *Queries) ListTemplateViews(ctx context.Context) ([]ListTemplateViewsRow
 			&i.ParentCategoryName,
 			&i.PayerID,
 			&i.PayerName,
+			&i.Personal,
 			&i.AmountCents,
 			&i.Variable,
 			&i.Note,
@@ -306,6 +315,7 @@ UPDATE templates
 SET type         = ?,
     category_id  = ?,
     payer_id     = ?,
+    personal     = ?,
     amount_cents = ?,
     variable     = ?,
     note         = ?,
@@ -320,6 +330,7 @@ type UpdateTemplateParams struct {
 	Type        string
 	CategoryID  int64
 	PayerID     int64
+	Personal    bool
 	AmountCents int64
 	Variable    bool
 	Note        string
@@ -334,6 +345,7 @@ func (q *Queries) UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) 
 		arg.Type,
 		arg.CategoryID,
 		arg.PayerID,
+		arg.Personal,
 		arg.AmountCents,
 		arg.Variable,
 		arg.Note,

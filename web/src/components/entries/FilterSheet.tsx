@@ -163,6 +163,19 @@ export function FilterSheet({
             </Field>
           </div>
 
+          <Field label="Shared / personal" htmlFor="f-sharing">
+            <Select value={draft.sharing ?? "all"} onValueChange={(v) => set({ sharing: v === "all" ? undefined : v })}>
+              <SelectTrigger id="f-sharing" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="shared">Shared expenses</SelectItem>
+                <SelectItem value="personal">Personal expenses</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+
           <Field label="Tag" htmlFor="f-tag">
             <InputGroup className="h-9">
               <InputGroupAddon>

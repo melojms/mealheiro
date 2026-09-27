@@ -17,6 +17,8 @@ import { CategoryPicker } from "@/components/entry/CategoryPicker"
 import { DateChips } from "@/components/entry/DateChips"
 import { useCategories, usePeople, useToday } from "@/components/entry/hooks"
 import { PayerChips } from "@/components/entry/PayerChips"
+import { PersonalChip } from "@/components/entry/PersonalChip"
+import { canBePersonal } from "@/components/entry/personal"
 import { TagInput } from "@/components/entry/TagInput"
 import { TypeSwitch } from "@/components/entry/TypeSwitch"
 import { api } from "@/lib/api"
@@ -40,11 +42,13 @@ export default function AddPage() {
   const [moreOpen, setMoreOpen] = useState(false)
   const [note, setNote] = useState("")
   const [tags, setTags] = useState<string[]>([])
+  const [personal, setPersonal] = useState(false) // resets after every save: expenses are shared by default
 
   const date = pickedDate ?? today
   const peopleList = people.data ?? []
   const knownDefault = peopleList.some((p) => p.id === defaultPayer) ? defaultPayer : null
   const payerId = pickedPayer ?? knownDefault
+  const personalAllowed = canBePersonal(type, peopleList.find((p) => p.id === payerId))
   const typeCategories = (categories.data ?? []).filter((c) => c.type === type)
   const cents = amountCents(amount)
 
@@ -56,6 +60,7 @@ export default function AddPage() {
       setCategoryId(null)
       setNote("")
       setTags([])
+      setPersonal(false)
       setMoreOpen(false)
       await announce(entry)
     },
@@ -66,7 +71,7 @@ export default function AddPage() {
 
   const save = () => {
     if (missing || create.isPending) return
-    create.mutate({ type, date, amount_cents: cents!, category_id: categoryId!, payer_id: payerId!, note: note.trim(), tags })
+    create.mutate({ type, date, amount_cents: cents!, category_id: categoryId!, payer_id: payerId!, personal: personalAllowed && personal, note: note.trim(), tags })
   }
 
   const onKey = (k: KeypadKey) => setAmount((a) => pressKey(a, k))
@@ -138,7 +143,10 @@ export default function AddPage() {
             ) : knownDefault === null && pickedPayer === null ? (
               <DevicePayerPrompt people={peopleList} />
             ) : (
-              <PayerChips people={peopleList} value={payerId} onChange={setPickedPayer} />
+              <div className="flex flex-wrap items-center gap-2">
+                <PayerChips people={peopleList} value={payerId} onChange={setPickedPayer} />
+                {personalAllowed && <PersonalChip value={personal} onChange={setPersonal} />}
+              </div>
             )}
           </div>
 

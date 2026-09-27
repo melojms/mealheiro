@@ -10,7 +10,7 @@ import (
 )
 
 const getEntryView = `-- name: GetEntryView :one
-SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view WHERE id = ?
+SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, payer_kind, personal, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view WHERE id = ?
 `
 
 func (q *Queries) GetEntryView(ctx context.Context, id int64) (EntryView, error) {
@@ -28,6 +28,8 @@ func (q *Queries) GetEntryView(ctx context.Context, id int64) (EntryView, error)
 		&i.TopCategoryID,
 		&i.PayerID,
 		&i.PayerName,
+		&i.PayerKind,
+		&i.Personal,
 		&i.Note,
 		&i.Status,
 		&i.TemplateID,
@@ -40,7 +42,7 @@ func (q *Queries) GetEntryView(ctx context.Context, id int64) (EntryView, error)
 }
 
 const listPendingEntryViews = `-- name: ListPendingEntryViews :many
-SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view WHERE status = 'pending' ORDER BY date, id
+SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, payer_kind, personal, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view WHERE status = 'pending' ORDER BY date, id
 `
 
 func (q *Queries) ListPendingEntryViews(ctx context.Context) ([]EntryView, error) {
@@ -64,6 +66,8 @@ func (q *Queries) ListPendingEntryViews(ctx context.Context) ([]EntryView, error
 			&i.TopCategoryID,
 			&i.PayerID,
 			&i.PayerName,
+			&i.PayerKind,
+			&i.Personal,
 			&i.Note,
 			&i.Status,
 			&i.TemplateID,

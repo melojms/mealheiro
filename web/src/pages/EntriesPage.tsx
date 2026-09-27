@@ -72,6 +72,7 @@ export default function EntriesPage() {
   if (filters.type) chips.push({ key: "type", label: TYPE_LABEL[filters.type as EntryType] ?? filters.type })
   if (filters.cat) chips.push({ key: "cat", label: byId.get(Number(filters.cat))?.name ?? "Category" })
   if (filters.payer) chips.push({ key: "payer", label: people?.find((p) => String(p.id) === filters.payer)?.name ?? "Payer" })
+  if (filters.sharing) chips.push({ key: "sharing", label: filters.sharing === "personal" ? "Personal" : "Shared" })
   if (filters.tag) chips.push({ key: "tag", label: `#${filters.tag}` })
   if (filters.min || filters.max)
     chips.push({

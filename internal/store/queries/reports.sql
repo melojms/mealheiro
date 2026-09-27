@@ -59,3 +59,20 @@ SELECT DISTINCT CAST(CAST(substr(e.date, 1, 4) AS INTEGER) AS INTEGER) AS year
 FROM entries e
 WHERE (sqlc.narg('payer_id') IS NULL OR e.payer_id = sqlc.narg('payer_id'))
 ORDER BY 1 DESC;
+
+-- name: ReportShared :many
+-- Shared expenses (not personal) per person for dates from..to, household-wide:
+-- Joint is left out and every person is listed, even with nothing paid.
+SELECT p.id,
+       p.name,
+       CAST(coalesce(sum(e.amount_cents), 0) AS INTEGER)                                     AS amount_cents,
+       CAST(coalesce(sum(CASE WHEN e.status = 'pending' THEN e.amount_cents END), 0) AS INTEGER) AS pending_cents
+FROM people p
+         LEFT JOIN entries e ON e.payer_id = p.id
+    AND e.type = 'expense'
+    AND NOT e.personal
+    AND e.date >= sqlc.arg('from_date')
+    AND e.date <= sqlc.arg('to_date')
+WHERE p.kind = 'person'
+GROUP BY p.id
+ORDER BY p.sort_order, p.id;

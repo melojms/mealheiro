@@ -1,12 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
 
 	"github.com/melojms/mealheiro/internal/clock"
 	"github.com/melojms/mealheiro/internal/reports"
+	"github.com/melojms/mealheiro/internal/store"
 )
 
 // Limits of the trends window.
@@ -21,6 +23,7 @@ func (s *Server) routesReports(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/reports/trends", s.handleTrendsReport)
 	mux.HandleFunc("GET /api/reports/year", s.handleYearReport)
 	mux.HandleFunc("GET /api/reports/years", s.handleReportYears)
+	mux.HandleFunc("GET /api/reports/shared", s.handleSharedReport)
 	mux.HandleFunc("GET /api/insights", s.handleInsights)
 }
 
@@ -121,6 +124,47 @@ func (s *Server) handleYearReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, reports.BuildYear(year, rows, cats))
+}
+
+// handleSharedReport splits shared expenses between the people for one month
+// (?month=, default current) or one calendar year (?year=). It is household-wide,
+// so it takes no payer_id.
+func (s *Server) handleSharedReport(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	rawMonth, rawYear := q.Get("month"), q.Get("year")
+	var from, to string
+	switch {
+	case rawMonth != "" && rawYear != "":
+		writeError(w, http.StatusBadRequest, "pass either month or year, not both")
+		return
+	case rawYear != "":
+		year, err := strconv.Atoi(rawYear)
+		if err != nil || year < 1000 || year > 9999 {
+			writeError(w, http.StatusBadRequest, "invalid year")
+			return
+		}
+		from, to = fmt.Sprintf("%04d-01-01", year), fmt.Sprintf("%04d-12-31", year)
+	default:
+		month := rawMonth
+		if month == "" {
+			month = clock.CurrentMonth(s.Clock)
+		}
+		var err error
+		if from, to, err = clock.MonthRange(month); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+	rows, err := s.Q.ReportShared(r.Context(), store.ReportSharedParams{FromDate: from, ToDate: to})
+	if err != nil {
+		s.internalError(w, r, err)
+		return
+	}
+	people := make([]reports.SharedPerson, len(rows))
+	for i, row := range rows {
+		people[i] = reports.SharedPerson{PersonID: row.ID, Name: row.Name, AmountCents: row.AmountCents, PendingCents: row.PendingCents}
+	}
+	writeJSON(w, http.StatusOK, reports.BuildShared(from, to, people))
 }
 
 func (s *Server) handleReportYears(w http.ResponseWriter, r *http.Request) {

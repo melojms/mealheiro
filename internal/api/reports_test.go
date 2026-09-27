@@ -77,6 +77,10 @@ func TestReportsValidation(t *testing.T) {
 		"/api/reports/years?payer_id=99",
 		"/api/insights?month=2026-00",
 		"/api/insights?payer_id=4",
+		"/api/reports/shared?month=2026-13",
+		"/api/reports/shared?year=abc",
+		"/api/reports/shared?year=99",
+		"/api/reports/shared?month=2026-03&year=2026",
 	}
 	for _, p := range paths {
 		t.Run(p, func(t *testing.T) {
@@ -422,4 +426,61 @@ func TestInsights(t *testing.T) {
 			t.Fatalf("got %d %q", rec.Code, rec.Body)
 		}
 	})
+}
+
+func TestSharedReport(t *testing.T) {
+	s, h := newTestServer(t)
+	seedReports(t, s)
+	// March extras for Person B: a personal expense (ignored) and a pending shared one.
+	if _, err := s.DB.ExecContext(t.Context(), `INSERT INTO entries (id, type, date, amount_cents, category_id, payer_id, personal, status) VALUES
+		(20, 'expense', '2026-03-05', 10000, 6, 2, TRUE, 'confirmed'),
+		(21, 'expense', '2026-03-06', 7000, 6, 2, FALSE, 'pending')`); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name  string
+		query string
+		want  reports.SharedReport
+	}{
+		{
+			name: "default is current month", query: "",
+			want: reports.SharedReport{From: "2026-03-01", To: "2026-03-31", TotalCents: 55000, PendingCents: 7000, People: []reports.SharedPerson{
+				{PersonID: 1, Name: "Person A", AmountCents: 48000},
+				{PersonID: 2, Name: "Person B", AmountCents: 7000, PendingCents: 7000},
+			}},
+		},
+		{
+			name: "month where one person paid nothing", query: "?month=2026-01",
+			want: reports.SharedReport{From: "2026-01-01", To: "2026-01-31", TotalCents: 30000, People: []reports.SharedPerson{
+				{PersonID: 1, Name: "Person A", AmountCents: 30000},
+				{PersonID: 2, Name: "Person B"},
+			}},
+		},
+		{
+			name: "year", query: "?year=2026",
+			want: reports.SharedReport{From: "2026-01-01", To: "2026-12-31", TotalCents: 120000, PendingCents: 7000, People: []reports.SharedPerson{
+				{PersonID: 1, Name: "Person A", AmountCents: 83000},
+				{PersonID: 2, Name: "Person B", AmountCents: 37000, PendingCents: 7000},
+			}},
+		},
+		{
+			name: "empty month", query: "?month=2024-05",
+			want: reports.SharedReport{From: "2024-05-01", To: "2024-05-31", People: []reports.SharedPerson{
+				{PersonID: 1, Name: "Person A"},
+				{PersonID: 2, Name: "Person B"},
+			}},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := do(t, h, "GET", "/api/reports/shared"+tc.query, nil)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status %d: %s", rec.Code, rec.Body)
+			}
+			if got := decode[reports.SharedReport](t, rec); !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("got  %+v\nwant %+v", got, tc.want)
+			}
+		})
+	}
 }

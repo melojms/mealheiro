@@ -36,6 +36,7 @@ export function EntryRow({
               pending
             </Badge>
           )}
+          {entry.personal && <Badge variant="outline">personal</Badge>}
         </div>
         <p className="text-muted-foreground truncate text-xs">{meta}</p>
       </div>

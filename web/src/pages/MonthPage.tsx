@@ -16,6 +16,7 @@ import { InsightsCard } from "@/components/month/InsightsCard"
 import { KpiGrid, KpiGridSkeleton } from "@/components/month/KpiGrid"
 import { PendingInbox } from "@/components/month/PendingInbox"
 import { RecurringCard } from "@/components/month/RecurringCard"
+import { SharedCard } from "@/components/month/SharedCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import type { Entry } from "@/lib/types"
@@ -101,6 +102,9 @@ export default function MonthPage() {
       ) : (
         <KpiGridSkeleton />
       )}
+
+      {/* Household-wide on purpose: comparing people is the point, so no payer filter. */}
+      {month && <SharedCard month={month} />}
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
         <div className="flex flex-col gap-4 lg:order-2">

@@ -31,7 +31,7 @@ Monthly: `leftover = income − expenses − investments`. `savings rate = (inco
 
 ### 3.2 People / payer
 - One `people` list: two persons + **Joint** (joint account, e.g. mortgage direct debit). Names editable.
-- Every entry (all types) has a payer. Informational only — finances are pooled, **no settle-up math**.
+- Every entry (all types) has a payer. Finances are pooled, **no settle-up math**; the payer only drives the shared-expenses split (§3.9).
 - Each device stores its default payer (localStorage); quick-add pre-selects it.
 
 ### 3.3 Categories
@@ -47,7 +47,8 @@ Seed:
 - **Investment**: ETFs/Stocks · Savings account · BTC
 
 ### 3.4 Entries
-Fields: type, date (local date, no time), amount (cents, always > 0; sign from type), category, payer, note (optional), tags (optional, many), status (`confirmed` | `pending`), template (if generated), created_at/updated_at.
+Fields: type, date (local date, no time), amount (cents, always > 0; sign from type), category, payer, personal (bool, default false), note (optional), tags (optional, many), status (`confirmed` | `pending`), template (if generated), created_at/updated_at.
+- **Personal**: expenses are shared by default; the "Personal" toggle keeps one out of the shared split (§3.9). Only expenses paid by a person can be personal — the API clears the flag for income/investments and for Joint. The Add screen resets it to off after every save.
 - Full edit/delete. "Recent entries" list under quick-add.
 - Currency: EUR only. Input accepts `12,50` and `12.50`. Display `12,50 €` style (pt-PT number format), English UI (strings centralized for future PT).
 - Dates/“today”/recurring generation use `TZ` (default `Europe/Lisbon`).
@@ -57,7 +58,7 @@ Free-form, many per entry, lowercase-normalized, autocomplete from existing tags
 
 ### 3.6 Recurring templates
 - Apply to all three types (e.g. mortgage, subscriptions, salary, monthly ETF contribution).
-- Fields: type, category, payer, amount, `variable` flag, note, `start_month`, optional `end_month`, `active`.
+- Fields: type, category, payer, amount, `variable` flag, `personal` flag (same rules as entries; copied onto generated entries), note, `start_month`, optional `end_month`, `active`.
 - Frequency: **monthly only**. Generated entries are dated the **1st of the month** (no due-day field).
 - **Fixed** templates → entry created `confirmed`. **Variable** templates (e.g. electricity, salary) → entry created `pending`, amount prefilled with the most recent entry from that template (or template amount), shown in the **"to confirm" inbox**. Confirming allows editing the amount.
 - Pending entries count in totals and budgets as estimates, visually flagged. Pending entries from past months get a warning badge; never auto-confirmed.
@@ -78,20 +79,26 @@ Thresholds are named constants.
 4. Savings rate vs last month.
 5. New recurring templates whose first generated entry is in this month.
 
+### 3.9 Shared expenses
+- Answers "are we both paying our half?". Target split is a fixed **50/50**; the app only shows totals — no "owes" wording, no settle-up.
+- Counts **expenses** that are not personal and were paid by a **person**. Joint-paid expenses are left out (the joint account is already shared). Pending estimates count and are flagged.
+- Per person: amount paid and share of the total (whole percentages summing to 100). Covers a month or its calendar year.
+- Household-wide: ignores the payer filter.
+
 ## 4. Screens
 
-1. **Add** (landing): amount keypad focused → category tile grid (subcategory row appears if any) → Save. Visible, prefilled chips: date (Today · Yesterday · pick), payer (device default), type switch (Expense/Income/Investment). Collapsed "More": note, tags. Below: recent entries (edit/delete).
-2. **Month**: KPIs (income · expenses · investments · leftover · savings %), budgets with progress bars, insights, category breakdown (donut + ranked list with Δ vs last month and vs 3-month avg; tap → subcategory split + entries), "Recurring this month: €X committed · N pending", pending inbox. Payer filter.
+1. **Add** (landing): amount keypad focused → category tile grid (subcategory row appears if any) → Save. Visible, prefilled chips: date (Today · Yesterday · pick), payer (device default), "Personal" toggle (expenses paid by a person only), type switch (Expense/Income/Investment). Collapsed "More": note, tags. Below: recent entries (edit/delete).
+2. **Month**: KPIs (income · expenses · investments · leftover · savings %), budgets with progress bars, insights, category breakdown (donut + ranked list with Δ vs last month and vs 3-month avg; tap → subcategory split + entries), "Recurring this month: €X committed · N pending", pending inbox. Payer filter. Right after the KPIs, a **Shared expenses** card (§3.9) with a Month | Year toggle: total, split bar with percentages, amount per person.
 3. **Trends**: stacked bars of expenses per category per month (last 12 months), line of income vs expenses vs savings, single-category toggle. Payer filter.
 4. **Year**: totals per category per year, year-over-year comparison. Payer filter.
-5. **Entries**: search & filter (text, type, category, payer, tag, amount range, date range) with totals.
+5. **Entries**: search & filter (text, type, category, payer, shared/personal, tag, amount range, date range) with totals. Personal entries carry a badge. "Shared" lists exactly what the Shared expenses card counts.
 6. **Settings**: people, categories (icon, color, archive), recurring templates, budgets, device default payer, theme (light/dark/system), CSV export, backup download.
 
 Responsive: phone-first; dashboards tuned for desktop too. PWA manifest (installable to home screen). Dark mode.
 
 ## 5. CSV export
 
-Date-range dialog + type filter. All entry types with a `type` column. Columns: `date;type;category;subcategory;amount;payer;note;tags;recurring;status`. Separator `;`, decimal comma (`12,50`), UTF-8 with BOM.
+Date-range dialog + type filter. All entry types with a `type` column. Columns: `date;type;category;subcategory;amount;payer;note;tags;recurring;status;personal`. Separator `;`, decimal comma (`12,50`), UTF-8 with BOM.
 
 ## 6. Operations
 
@@ -104,4 +111,4 @@ Date-range dialog + type filter. All entry types with a `type` column. Columns: 
 
 ## 7. Out of scope (MVP)
 
-Auth · multi-currency · bank import · savings goals (later) · receipt photos · settle-up · payment method / merchant fields · offline queue.
+Auth · multi-currency · bank import · savings goals (later) · receipt photos · settle-up (shared expenses show totals only) · custom split ratios · payment method / merchant fields · offline queue.

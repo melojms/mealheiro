@@ -169,6 +169,64 @@ func (q *Queries) ReportNonRecurringExpenseSum(ctx context.Context, arg ReportNo
 	return amount_cents, err
 }
 
+const reportShared = `-- name: ReportShared :many
+SELECT p.id,
+       p.name,
+       CAST(coalesce(sum(e.amount_cents), 0) AS INTEGER)                                     AS amount_cents,
+       CAST(coalesce(sum(CASE WHEN e.status = 'pending' THEN e.amount_cents END), 0) AS INTEGER) AS pending_cents
+FROM people p
+         LEFT JOIN entries e ON e.payer_id = p.id
+    AND e.type = 'expense'
+    AND NOT e.personal
+    AND e.date >= ?1
+    AND e.date <= ?2
+WHERE p.kind = 'person'
+GROUP BY p.id
+ORDER BY p.sort_order, p.id
+`
+
+type ReportSharedParams struct {
+	FromDate string
+	ToDate   string
+}
+
+type ReportSharedRow struct {
+	ID           int64
+	Name         string
+	AmountCents  int64
+	PendingCents int64
+}
+
+// Shared expenses (not personal) per person for dates from..to, household-wide:
+// Joint is left out and every person is listed, even with nothing paid.
+func (q *Queries) ReportShared(ctx context.Context, arg ReportSharedParams) ([]ReportSharedRow, error) {
+	rows, err := q.db.QueryContext(ctx, reportShared, arg.FromDate, arg.ToDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ReportSharedRow{}
+	for rows.Next() {
+		var i ReportSharedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.AmountCents,
+			&i.PendingCents,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const reportTemplatesStarting = `-- name: ReportTemplatesStarting :many
 SELECT t.id,
        t.type,
@@ -231,7 +289,7 @@ func (q *Queries) ReportTemplatesStarting(ctx context.Context, arg ReportTemplat
 }
 
 const reportTopExpenses = `-- name: ReportTopExpenses :many
-SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view v
+SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, payer_kind, personal, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view v
 WHERE v.type = 'expense'
   AND v.date >= ?1
   AND v.date <= ?2
@@ -273,6 +331,8 @@ func (q *Queries) ReportTopExpenses(ctx context.Context, arg ReportTopExpensesPa
 			&i.TopCategoryID,
 			&i.PayerID,
 			&i.PayerName,
+			&i.PayerKind,
+			&i.Personal,
 			&i.Note,
 			&i.Status,
 			&i.TemplateID,

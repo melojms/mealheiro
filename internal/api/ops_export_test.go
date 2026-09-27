@@ -29,17 +29,17 @@ func opsSeedExport(t *testing.T, s *Server) {
 	}
 }
 
-const opsCSVHeader = "\xef\xbb\xbfdate;type;category;subcategory;amount;payer;note;tags;recurring;status\r\n"
+const opsCSVHeader = "\xef\xbb\xbfdate;type;category;subcategory;amount;payer;note;tags;recurring;status;personal\r\n"
 
 func TestExportCSV(t *testing.T) {
 	s, h := newTestServer(t)
 	opsSeedExport(t, s)
 
 	var (
-		income    = "2026-02-25;income;Salary;;2500,50;Person A;;;no;pending\r\n"
-		mortgage  = "2026-03-01;expense;House;Mortgage;800,00;Joint;;;yes;confirmed\r\n"
-		groceries = "2026-03-02;expense;Groceries;;12,50;Person A;\"Lidl; \"\"big\"\" shop\";food,weekly;no;confirmed\r\n"
-		etf       = "2026-04-01;investment;ETFs/Stocks;;100,00;Person A;;;no;confirmed\r\n"
+		income    = "2026-02-25;income;Salary;;2500,50;Person A;;;no;pending;no\r\n"
+		mortgage  = "2026-03-01;expense;House;Mortgage;800,00;Joint;;;yes;confirmed;no\r\n"
+		groceries = "2026-03-02;expense;Groceries;;12,50;Person A;\"Lidl; \"\"big\"\" shop\";food,weekly;no;confirmed;no\r\n"
+		etf       = "2026-04-01;investment;ETFs/Stocks;;100,00;Person A;;;no;confirmed;no\r\n"
 	)
 	tests := []struct {
 		name, query, filename, body string

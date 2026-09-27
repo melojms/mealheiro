@@ -40,6 +40,11 @@ export function EntryRow({
               Pending
             </Badge>
           )}
+          {entry.personal && (
+            <Badge variant="outline" className="h-4 px-1.5 text-[10px]">
+              Personal
+            </Badge>
+          )}
         </div>
         <div className="text-muted-foreground truncate text-xs">
           {subtitle.join(" · ")}

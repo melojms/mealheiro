@@ -37,6 +37,14 @@ describe("toApiFilters", () => {
     expect(toApiFilters({ type: "gift", cat: "abc", payer: "-1", min: "x", max: "" }, today)).toEqual({})
   })
 
+  it("maps sharing and drops unknown values", () => {
+    expect(toApiFilters({ sharing: "shared" }, today)).toEqual({ sharing: "shared" })
+    expect(toApiFilters({ sharing: "personal" }, today)).toEqual({ sharing: "personal" })
+    expect(toApiFilters({ sharing: "both" }, today)).toEqual({})
+  })
+
+  it("counts sharing as an active filter", () => expect(activeFilterCount({ sharing: "shared" })).toBe(1))
+
   it("keeps a zero min amount", () => expect(toApiFilters({ min: "0" }, today)).toEqual({ min_cents: 0 }))
 
   it("uses custom from/to and ignores malformed dates", () => {
