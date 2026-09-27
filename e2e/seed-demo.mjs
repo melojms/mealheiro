@@ -27,8 +27,8 @@ const id = (name) => {
   return c.id
 }
 
-await call("PATCH", "/api/people/1", { name: "João" })
-await call("PATCH", "/api/people/2", { name: "Maria" })
+await call("PATCH", "/api/people/1", { name: "Ana" })
+await call("PATCH", "/api/people/2", { name: "José" })
 
 const startMonth = (() => {
   const d = new Date(Date.UTC(curY, curM - 1 - 11, 1))
