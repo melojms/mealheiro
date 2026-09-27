@@ -90,6 +90,7 @@ func exportRow(v store.EntryView) export.Row {
 		Note:        v.Note,
 		Recurring:   v.TemplateMonth != nil,
 		Status:      v.Status,
+		Personal:    v.Personal,
 	}
 	if v.ParentCategoryID != nil {
 		row.Category, row.Subcategory = v.ParentCategoryName, v.CategoryName

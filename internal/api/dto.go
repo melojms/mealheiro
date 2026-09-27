@@ -18,6 +18,7 @@ type Entry struct {
 	ParentCategoryName *string  `json:"parent_category_name"`
 	PayerID            int64    `json:"payer_id"`
 	PayerName          string   `json:"payer_name"`
+	Personal           bool     `json:"personal"`
 	Note               string   `json:"note"`
 	Tags               []string `json:"tags"`
 	Status             string   `json:"status"`
@@ -39,6 +40,7 @@ func entryFromView(v store.EntryView) Entry {
 		ParentCategoryID: v.ParentCategoryID,
 		PayerID:          v.PayerID,
 		PayerName:        v.PayerName,
+		Personal:         v.Personal,
 		Note:             v.Note,
 		Tags:             []string{},
 		Status:           v.Status,

@@ -1,15 +1,16 @@
 // Entries screen filters: URL search params <-> API query. Pure so it can be unit-tested.
 import { isDate, isPreset, presetRange, type DatePreset } from "@/components/filters/dates"
 import { parseAmount } from "@/lib/money"
-import type { EntryFilters, EntryType } from "@/lib/types"
+import type { EntryFilters, EntryType, Sharing } from "@/lib/types"
 
-export const FILTER_KEYS = ["q", "type", "cat", "payer", "tag", "min", "max", "range", "from", "to"] as const
+export const FILTER_KEYS = ["q", "type", "cat", "payer", "sharing", "tag", "min", "max", "range", "from", "to"] as const
 export type FilterKey = (typeof FILTER_KEYS)[number]
 
 /** Raw, user-facing filter values as stored in the URL (amounts stay as typed, e.g. "12,50"). */
 export type UrlFilters = Partial<Record<FilterKey, string>>
 
 const TYPES: EntryType[] = ["expense", "income", "investment"]
+const SHARING: Sharing[] = ["shared", "personal"]
 
 export function readUrlFilters(sp: URLSearchParams): UrlFilters {
   const f: UrlFilters = {}
@@ -51,6 +52,7 @@ export function toApiFilters(f: UrlFilters, today: string): EntryFilters {
   if (cat) out.category_id = cat
   const payer = posInt(f.payer)
   if (payer) out.payer_id = payer
+  if (f.sharing && SHARING.includes(f.sharing as Sharing)) out.sharing = f.sharing as Sharing
   if (f.tag) out.tag = f.tag.toLowerCase()
   const min = f.min ? parseAmount(f.min) : null
   if (min !== null) out.min_cents = min
@@ -72,6 +74,7 @@ export function activeFilterCount(f: UrlFilters): number {
   if (f.type) n++
   if (f.cat) n++
   if (f.payer) n++
+  if (f.sharing) n++
   if (f.tag) n++
   if (f.min || f.max) n++
   if (datePreset(f)) n++
@@ -83,6 +86,7 @@ export const CHIP_KEYS = {
   type: ["type", "cat"],
   cat: ["cat"],
   payer: ["payer"],
+  sharing: ["sharing"],
   tag: ["tag"],
   amount: ["min", "max"],
   date: ["range", "from", "to"],

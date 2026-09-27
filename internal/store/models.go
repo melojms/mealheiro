@@ -36,6 +36,7 @@ type Entry struct {
 	TemplateMonth *string
 	CreatedAt     string
 	UpdatedAt     string
+	Personal      bool
 }
 
 type EntryTag struct {
@@ -55,6 +56,8 @@ type EntryView struct {
 	TopCategoryID      int64
 	PayerID            int64
 	PayerName          string
+	PayerKind          string
+	Personal           bool
 	Note               string
 	Status             string
 	TemplateID         *int64
@@ -90,6 +93,7 @@ type Template struct {
 	Active      bool
 	CreatedAt   string
 	UpdatedAt   string
+	Personal    bool
 }
 
 type TemplateRun struct {

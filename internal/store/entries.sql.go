@@ -25,8 +25,8 @@ func (q *Queries) ConfirmEntry(ctx context.Context, arg ConfirmEntryParams) erro
 }
 
 const createEntry = `-- name: CreateEntry :one
-INSERT INTO entries (type, date, amount_cents, category_id, payer_id, note, status, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?7, ?7)
+INSERT INTO entries (type, date, amount_cents, category_id, payer_id, personal, note, status, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed', ?8, ?8)
 RETURNING id
 `
 
@@ -36,6 +36,7 @@ type CreateEntryParams struct {
 	AmountCents int64
 	CategoryID  int64
 	PayerID     int64
+	Personal    bool
 	Note        string
 	Now         string
 }
@@ -47,6 +48,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (int64
 		arg.AmountCents,
 		arg.CategoryID,
 		arg.PayerID,
+		arg.Personal,
 		arg.Note,
 		arg.Now,
 	)
@@ -68,7 +70,7 @@ func (q *Queries) DeleteEntry(ctx context.Context, id int64) (int64, error) {
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, type, date, amount_cents, category_id, payer_id, note, status, template_id, template_month, created_at, updated_at FROM entries WHERE id = ?
+SELECT id, type, date, amount_cents, category_id, payer_id, note, status, template_id, template_month, created_at, updated_at, personal FROM entries WHERE id = ?
 `
 
 func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
@@ -87,6 +89,7 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 		&i.TemplateMonth,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Personal,
 	)
 	return i, err
 }
@@ -98,6 +101,7 @@ SET type         = ?,
     amount_cents = ?,
     category_id  = ?,
     payer_id     = ?,
+    personal     = ?,
     note         = ?,
     updated_at   = ?
 WHERE id = ?
@@ -109,6 +113,7 @@ type UpdateEntryParams struct {
 	AmountCents int64
 	CategoryID  int64
 	PayerID     int64
+	Personal    bool
 	Note        string
 	UpdatedAt   string
 	ID          int64
@@ -121,6 +126,7 @@ func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) error 
 		arg.AmountCents,
 		arg.CategoryID,
 		arg.PayerID,
+		arg.Personal,
 		arg.Note,
 		arg.UpdatedAt,
 		arg.ID,

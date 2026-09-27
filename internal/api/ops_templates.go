@@ -21,6 +21,7 @@ type Template struct {
 	ParentCategoryName *string `json:"parent_category_name"`
 	PayerID            int64   `json:"payer_id"`
 	PayerName          string  `json:"payer_name"`
+	Personal           bool    `json:"personal"`
 	AmountCents        int64   `json:"amount_cents"`
 	Variable           bool    `json:"variable"`
 	Note               string  `json:"note"`
@@ -34,6 +35,7 @@ type templateInput struct {
 	Type        string  `json:"type"`
 	CategoryID  int64   `json:"category_id"`
 	PayerID     int64   `json:"payer_id"`
+	Personal    bool    `json:"personal"`
 	AmountCents int64   `json:"amount_cents"`
 	Variable    bool    `json:"variable"`
 	Note        string  `json:"note"`
@@ -56,6 +58,7 @@ func templateFromRow(r store.ListTemplateViewsRow) Template {
 		CategoryName: r.CategoryName,
 		PayerID:      r.PayerID,
 		PayerName:    r.PayerName,
+		Personal:     r.Personal,
 		AmountCents:  r.AmountCents,
 		Variable:     r.Variable,
 		Note:         r.Note,
@@ -115,11 +118,13 @@ func (s *Server) validateTemplate(ctx context.Context, in *templateInput, prevCa
 		return "category is archived", nil
 	}
 
-	if _, err := s.Q.GetPerson(ctx, in.PayerID); errors.Is(err, sql.ErrNoRows) {
+	payer, err := s.Q.GetPerson(ctx, in.PayerID)
+	if errors.Is(err, sql.ErrNoRows) {
 		return "payer not found", nil
 	} else if err != nil {
 		return "", err
 	}
+	in.Personal = personalAllowed(in.Type, payer.Kind) && in.Personal
 	return "", nil
 }
 
@@ -176,6 +181,7 @@ func (s *Server) handleCreateTemplate(w http.ResponseWriter, r *http.Request) {
 		Type:        in.Type,
 		CategoryID:  in.CategoryID,
 		PayerID:     in.PayerID,
+		Personal:    in.Personal,
 		AmountCents: in.AmountCents,
 		Variable:    in.Variable,
 		Note:        in.Note,
@@ -227,6 +233,7 @@ func (s *Server) handleUpdateTemplate(w http.ResponseWriter, r *http.Request) {
 		Type:        in.Type,
 		CategoryID:  in.CategoryID,
 		PayerID:     in.PayerID,
+		Personal:    in.Personal,
 		AmountCents: in.AmountCents,
 		Variable:    in.Variable,
 		Note:        in.Note,

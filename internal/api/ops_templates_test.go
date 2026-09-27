@@ -274,3 +274,50 @@ func TestPending(t *testing.T) {
 }
 
 func opsItoa(n int64) string { return strconv.FormatInt(n, 10) }
+
+func TestTemplatePersonalFlag(t *testing.T) {
+	tests := []struct {
+		name string
+		body map[string]any
+		want bool
+	}{
+		{name: "defaults to shared", body: opsWith(templateBody(), "payer_id", 1), want: false},
+		{name: "personal expense kept", body: opsWith(templateBody(), "payer_id", 1, "personal", true), want: true},
+		{name: "cleared when joint pays", body: opsWith(templateBody(), "personal", true), want: false},
+		{name: "cleared on income", body: opsWith(templateBody(), "payer_id", 1, "personal", true, "type", "income", "category_id", 100), want: false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			_, h := newTestServer(t)
+			rec := do(t, h, "POST", "/api/templates", tc.body)
+			if rec.Code != http.StatusCreated {
+				t.Fatalf("create = %d %s", rec.Code, rec.Body)
+			}
+			tpl := decode[Template](t, rec)
+			if tpl.Personal != tc.want {
+				t.Fatalf("create personal = %v, want %v", tpl.Personal, tc.want)
+			}
+			rec = do(t, h, "PUT", "/api/templates/"+opsItoa(tpl.ID), tc.body)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("update = %d %s", rec.Code, rec.Body)
+			}
+			if got := decode[Template](t, rec).Personal; got != tc.want {
+				t.Fatalf("update personal = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUpdateTemplatePersonalKeepsGeneratedEntries(t *testing.T) {
+	s, h := newTestServer(t)
+	body := opsWith(templateBody(), "payer_id", 1, "personal", true)
+	id := decode[Template](t, do(t, h, "POST", "/api/templates", body)).ID
+
+	if rec := do(t, h, "PUT", "/api/templates/"+opsItoa(id), opsWith(body, "personal", false)); rec.Code != http.StatusOK {
+		t.Fatalf("update = %d %s", rec.Code, rec.Body)
+	}
+	var n int
+	if err := s.DB.QueryRowContext(t.Context(), `SELECT count(*) FROM entries WHERE template_id = ? AND personal`, id).Scan(&n); err != nil || n != 3 {
+		t.Fatalf("personal generated entries = %d %v, want 3", n, err)
+	}
+}

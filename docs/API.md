@@ -33,6 +33,7 @@ interface Entry {
   category_id: number; category_name: string
   parent_category_id: number | null; parent_category_name: string | null
   payer_id: number; payer_name: string
+  personal: boolean                        // left out of the shared split; always false unless an expense paid by a person
   note: string; tags: string[]            // sorted asc
   status: EntryStatus
   template_id: number | null
@@ -43,6 +44,7 @@ interface Entry {
 interface EntryInput {
   type: EntryType; date: string; amount_cents: number
   category_id: number; payer_id: number
+  personal?: boolean                       // default false; cleared server-side for non-expenses and Joint
   note?: string; tags?: string[]           // tags lowercased + trimmed + deduped server-side
 }
 ```
@@ -81,7 +83,7 @@ interface EntryInput {
 | `POST /api/entries/{id}/confirm` | `{amount_cents?}` | `Entry` with status `confirmed` (optionally updating the amount). 400 if not pending. |
 | `DELETE /api/entries/{id}` | | `204` |
 
-`GET /api/entries` query params (all optional): `from`, `to` (dates, inclusive), `type`, `category_id` (matches the category **or its children**), `payer_id`, `tag`, `q` (case-insensitive substring over note, category name, parent category name, tags), `min_cents`, `max_cents`, `status`, `limit` (default 50, max 500), `offset`.
+`GET /api/entries` query params (all optional): `from`, `to` (dates, inclusive), `type`, `category_id` (matches the category **or its children**), `payer_id`, `tag`, `q` (case-insensitive substring over note, category name, parent category name, tags), `min_cents`, `max_cents`, `status`, `sharing` (`shared` = exactly what `/api/reports/shared` counts: non-personal expenses paid by a person; `personal` = personal entries), `limit` (default 50, max 500), `offset`.
 
 ```ts
 interface EntryList {
@@ -105,14 +107,14 @@ interface EntryList {
 interface Template {
   id: number; type: EntryType
   category_id: number; category_name: string; parent_category_name: string | null
-  payer_id: number; payer_name: string
+  payer_id: number; payer_name: string; personal: boolean
   amount_cents: number; variable: boolean; note: string
   start_month: string; end_month: string | null; active: boolean
   last_generated_month: string | null
 }
 interface TemplateInput {
   type: EntryType; category_id: number; payer_id: number; amount_cents: number
-  variable: boolean; note?: string; start_month: string; end_month?: string | null; active?: boolean // default true
+  variable: boolean; personal?: boolean; note?: string; start_month: string; end_month?: string | null; active?: boolean // default true
 }
 ```
 
@@ -153,14 +155,14 @@ Effective budget for month M = row with greatest `effective_from <= M` for that 
 
 | Method & path | Response |
 |---|---|
-| `GET /api/export.csv?from=&to=&types=expense,income,investment` | `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="mealheiro_<from>_<to>.csv"`. UTF-8 BOM, `;` separator, CRLF, header `date;type;category;subcategory;amount;payer;note;tags;recurring;status`. `category` = top-level name, `subcategory` = leaf name or empty. `amount` decimal comma `12,50`. `tags` joined with `,`. `recurring` `yes`/`no`. Date asc. Fields quoted per RFC 4180 when needed. Missing from/to = unbounded. |
+| `GET /api/export.csv?from=&to=&types=expense,income,investment` | `text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="mealheiro_<from>_<to>.csv"`. UTF-8 BOM, `;` separator, CRLF, header `date;type;category;subcategory;amount;payer;note;tags;recurring;status;personal`. `category` = top-level name, `subcategory` = leaf name or empty. `amount` decimal comma `12,50`. `tags` joined with `,`. `recurring` and `personal` `yes`/`no`. Date asc. Fields quoted per RFC 4180 when needed. Missing from/to = unbounded. |
 | `GET /api/backup` | `application/octet-stream`, `Content-Disposition: attachment; filename="mealheiro-<YYYYMMDD-HHMMSS>.db"`: consistent `VACUUM INTO` snapshot streamed then deleted. |
 
 Nightly: `backup.Nightly` writes `<DATA_DIR>/backups/mealheiro-YYYYMMDD.db` once per day and keeps the newest 30.
 
 ## Reports  *(owner: be-reports)*
 
-All accept optional `payer_id`.
+All accept optional `payer_id`, except `/api/reports/shared` (household-wide).
 
 ### `GET /api/reports/month?month=` (default current)
 
@@ -216,6 +218,18 @@ interface YearReport {
   categories: { category_id: number; name: string; icon: string; color: string; type: EntryType; amount_cents: number; prev_year_cents: number }[]
                                            // all types, top-level, non-zero in either year, type then amount desc
   monthly: { month: string; income_cents: number; expense_cents: number; investment_cents: number }[] // 12 items
+}
+```
+
+### `GET /api/reports/shared?month=` (default current) `| ?year=`
+
+Shared (non-personal) expenses per person for one month or one calendar year; pass one of `month`/`year`, not both. Joint-paid expenses are excluded. Pending estimates are included in `amount_cents` and broken out in `pending_cents`.
+
+```ts
+interface SharedReport {
+  from: string; to: string                 // inclusive date range
+  total_cents: number; pending_cents: number
+  people: { person_id: number; name: string; amount_cents: number; pending_cents: number }[] // every person (never Joint), people order, 0 when nothing paid
 }
 ```
 

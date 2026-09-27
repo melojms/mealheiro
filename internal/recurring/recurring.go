@@ -84,6 +84,7 @@ func generateTemplate(ctx context.Context, db *sql.DB, t store.Template, current
 			AmountCents:   amount,
 			CategoryID:    t.CategoryID,
 			PayerID:       t.PayerID,
+			Personal:      t.Personal,
 			Note:          t.Note,
 			Status:        status,
 			TemplateID:    &t.ID,

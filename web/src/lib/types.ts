@@ -32,6 +32,8 @@ export interface Entry {
   parent_category_name: string | null
   payer_id: number
   payer_name: string
+  /** Expense left out of the shared split. Always false for Joint or non-expenses. */
+  personal: boolean
   note: string
   tags: string[]
   status: EntryStatus
@@ -51,9 +53,12 @@ export interface EntryInput {
   amount_cents: number
   category_id: number
   payer_id: number
+  personal?: boolean
   note?: string
   tags?: string[]
 }
+
+export type Sharing = "shared" | "personal"
 
 export interface EntryFilters {
   from?: string
@@ -61,6 +66,8 @@ export interface EntryFilters {
   type?: EntryType
   category_id?: number
   payer_id?: number
+  /** shared = exactly the rows the shared report counts. */
+  sharing?: Sharing
   tag?: string
   q?: string
   min_cents?: number
@@ -105,6 +112,7 @@ export interface Template {
   parent_category_name: string | null
   payer_id: number
   payer_name: string
+  personal: boolean
   amount_cents: number
   variable: boolean
   note: string
@@ -118,6 +126,7 @@ export interface TemplateInput {
   type: EntryType
   category_id: number
   payer_id: number
+  personal?: boolean
   amount_cents: number
   variable: boolean
   note?: string
@@ -232,4 +241,20 @@ export interface Meta {
   month: string
   timezone: string
   version: string
+}
+
+export interface SharedPerson {
+  person_id: number
+  name: string
+  amount_cents: number // includes pending estimates
+  pending_cents: number
+}
+
+/** Shared (non-personal) expenses per person; Joint-paid ones are not included. */
+export interface SharedReport {
+  from: string
+  to: string
+  total_cents: number
+  pending_cents: number
+  people: SharedPerson[]
 }

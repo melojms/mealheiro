@@ -186,3 +186,24 @@ func TestGenerateCopiesTemplateFields(t *testing.T) {
 		t.Fatalf("runs = %d, %v", runs, err)
 	}
 }
+
+func TestGenerateCopiesPersonalFlag(t *testing.T) {
+	db := store.OpenTest(t)
+	id, err := store.New(db).CreateTemplate(t.Context(), store.CreateTemplateParams{
+		Type: "expense", CategoryID: 51, PayerID: 1, Personal: true, AmountCents: 1000,
+		StartMonth: "2026-03", Active: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Generate(t.Context(), db, at(2026, 3, 15)); err != nil {
+		t.Fatal(err)
+	}
+	var personal bool
+	if err := db.QueryRowContext(t.Context(), `SELECT personal FROM entries WHERE template_id = ?`, id).Scan(&personal); err != nil {
+		t.Fatal(err)
+	}
+	if !personal {
+		t.Fatal("generated entry personal = false, want true")
+	}
+}

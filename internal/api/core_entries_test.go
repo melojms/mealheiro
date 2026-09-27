@@ -475,3 +475,80 @@ func TestListEntriesEmpty(t *testing.T) {
 		t.Fatalf("body = %s", body)
 	}
 }
+
+func TestEntryPersonalFlag(t *testing.T) {
+	tests := []struct {
+		name string
+		body map[string]any
+		want bool
+	}{
+		{name: "defaults to shared", body: coreEntryBody(), want: false},
+		{name: "personal expense kept", body: coreEntryBody(coreWith("personal", true)), want: true},
+		{name: "cleared when joint pays", body: coreEntryBody(coreWith("personal", true), coreWith("payer_id", 3)), want: false},
+		{name: "cleared on income", body: coreEntryBody(coreWith("personal", true), coreWith("type", "income"), coreWith("category_id", 100)), want: false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			_, h := newTestServer(t)
+			e := coreCreateEntry(t, h, tc.body)
+			if e.Personal != tc.want {
+				t.Fatalf("create personal = %v, want %v", e.Personal, tc.want)
+			}
+			rec := do(t, h, "PUT", fmt.Sprintf("/api/entries/%d", e.ID), tc.body)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("update: %d %s", rec.Code, rec.Body)
+			}
+			if got := decode[Entry](t, rec).Personal; got != tc.want {
+				t.Fatalf("update personal = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUpdateEntryClearsPersonalWhenPayerBecomesJoint(t *testing.T) {
+	_, h := newTestServer(t)
+	e := coreCreateEntry(t, h, coreEntryBody(coreWith("personal", true)))
+	rec := do(t, h, "PUT", fmt.Sprintf("/api/entries/%d", e.ID), coreEntryBody(coreWith("personal", true), coreWith("payer_id", 3)))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("update: %d %s", rec.Code, rec.Body)
+	}
+	if decode[Entry](t, rec).Personal {
+		t.Fatal("personal kept after payer became joint")
+	}
+}
+
+func TestListEntriesSharing(t *testing.T) {
+	_, h := newTestServer(t)
+	shared := coreCreateEntry(t, h, coreEntryBody(coreWith("amount_cents", 1000)))
+	personal := coreCreateEntry(t, h, coreEntryBody(coreWith("amount_cents", 200), coreWith("payer_id", 2), coreWith("personal", true)))
+	coreCreateEntry(t, h, coreEntryBody(coreWith("amount_cents", 300), coreWith("payer_id", 3))) // joint: neither
+	coreCreateEntry(t, h, coreEntryBody(coreWith("type", "income"), coreWith("category_id", 100)))
+
+	tests := []struct {
+		query   string
+		wantIDs []int64
+		wantExp int64
+	}{
+		{query: "sharing=shared", wantIDs: []int64{shared.ID}, wantExp: 1000},
+		{query: "sharing=personal", wantIDs: []int64{personal.ID}, wantExp: 200},
+	}
+	for _, tc := range tests {
+		t.Run(tc.query, func(t *testing.T) {
+			rec := do(t, h, "GET", "/api/entries?"+tc.query, nil)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("list: %d %s", rec.Code, rec.Body)
+			}
+			list := decode[EntryList](t, rec)
+			ids := []int64{}
+			for _, e := range list.Entries {
+				ids = append(ids, e.ID)
+			}
+			if fmt.Sprint(ids) != fmt.Sprint(tc.wantIDs) || list.Totals.ExpenseCents != tc.wantExp {
+				t.Fatalf("ids = %v expense = %d, want %v %d", ids, list.Totals.ExpenseCents, tc.wantIDs, tc.wantExp)
+			}
+		})
+	}
+	if rec := do(t, h, "GET", "/api/entries?sharing=nope", nil); rec.Code != http.StatusBadRequest {
+		t.Fatalf("invalid sharing = %d, want 400", rec.Code)
+	}
+}

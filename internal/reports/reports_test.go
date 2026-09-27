@@ -347,3 +347,16 @@ func TestYearWindow(t *testing.T) {
 		t.Fatalf("YearWindow = %q %q", from, to)
 	}
 }
+
+func TestBuildShared(t *testing.T) {
+	got := BuildShared("2026-03-01", "2026-03-31", []SharedPerson{
+		{PersonID: 1, Name: "A", AmountCents: 48000},
+		{PersonID: 2, Name: "B", AmountCents: 7000, PendingCents: 7000},
+	})
+	if got.TotalCents != 55000 || got.PendingCents != 7000 || len(got.People) != 2 {
+		t.Fatalf("got %+v", got)
+	}
+	if empty := BuildShared("2026-03-01", "2026-03-31", nil); empty.People == nil || empty.TotalCents != 0 {
+		t.Fatalf("empty = %+v", empty)
+	}
+}

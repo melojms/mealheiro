@@ -6,6 +6,7 @@ SELECT t.id,
        coalesce(pc.name, '')                                                                AS parent_category_name, -- '' when top-level
        t.payer_id,
        p.name                                                                              AS payer_name,
+       t.personal,
        t.amount_cents,
        t.variable,
        t.note,
@@ -23,8 +24,8 @@ ORDER BY t.active DESC, t.type, c.name COLLATE NOCASE, t.id;
 SELECT * FROM templates WHERE id = ?;
 
 -- name: CreateTemplate :one
-INSERT INTO templates (type, category_id, payer_id, amount_cents, variable, note, start_month, end_month, active)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO templates (type, category_id, payer_id, personal, amount_cents, variable, note, start_month, end_month, active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id;
 
 -- name: UpdateTemplate :execrows
@@ -32,6 +33,7 @@ UPDATE templates
 SET type         = ?,
     category_id  = ?,
     payer_id     = ?,
+    personal     = ?,
     amount_cents = ?,
     variable     = ?,
     note         = ?,
@@ -57,8 +59,8 @@ SELECT month FROM template_runs WHERE template_id = ?;
 SELECT amount_cents FROM entries WHERE template_id = ? ORDER BY date DESC, id DESC LIMIT 1;
 
 -- name: InsertGeneratedEntry :exec
-INSERT INTO entries (type, date, amount_cents, category_id, payer_id, note, status, template_id, template_month)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO entries (type, date, amount_cents, category_id, payer_id, personal, note, status, template_id, template_month)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: InsertTemplateRun :exec
 INSERT INTO template_runs (template_id, month) VALUES (?, ?);

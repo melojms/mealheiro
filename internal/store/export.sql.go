@@ -10,7 +10,7 @@ import (
 )
 
 const listExportEntries = `-- name: ListExportEntries :many
-SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view
+SELECT id, type, date, amount_cents, category_id, category_name, parent_category_id, parent_category_name, top_category_id, payer_id, payer_name, payer_kind, personal, note, status, template_id, template_month, tags_csv, created_at, updated_at FROM entry_view
 WHERE date >= ?1
   AND date <= ?2
 ORDER BY date, id
@@ -42,6 +42,8 @@ func (q *Queries) ListExportEntries(ctx context.Context, arg ListExportEntriesPa
 			&i.TopCategoryID,
 			&i.PayerID,
 			&i.PayerName,
+			&i.PayerKind,
+			&i.Personal,
 			&i.Note,
 			&i.Status,
 			&i.TemplateID,

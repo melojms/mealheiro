@@ -13,6 +13,7 @@ import { centsToInput } from "@/components/add/amount"
 import { ConfirmDialog } from "@/components/entry/ConfirmDialog"
 import { useCategories, usePeople } from "@/components/entry/hooks"
 import { PayerChips } from "@/components/entry/PayerChips"
+import { canBePersonal } from "@/components/entry/personal"
 import { ResponsiveDialog } from "@/components/entry/ResponsiveDialog"
 import { TypeSwitch } from "@/components/entry/TypeSwitch"
 import { api } from "@/lib/api"
@@ -36,6 +37,7 @@ export function TemplateDialog({
   const [payerId, setPayerId] = useState<number | null>(template?.payer_id ?? defaultPayer)
   const [amount, setAmount] = useState(template ? centsToInput(template.amount_cents) : "")
   const [variable, setVariable] = useState(template?.variable ?? false)
+  const [personal, setPersonal] = useState(template?.personal ?? false)
   const [note, setNote] = useState(template?.note ?? "")
   const [startMonth, setStartMonth] = useState(template?.start_month ?? currentMonth)
   const [endMonth, setEndMonth] = useState(template?.end_month ?? "")
@@ -45,6 +47,7 @@ export function TemplateDialog({
   const categories = allCategories.filter((c) => c.type === type && (!c.archived || c.id === template?.category_id))
   const tops = categories.filter((c) => c.parent_id === null).sort((a, b) => a.name.localeCompare(b.name))
 
+  const personalAllowed = canBePersonal(type, people.find((p) => p.id === payerId))
   const cents = parseAmount(amount)
   const endInvalid = endMonth !== "" && (!MONTH_RE.test(endMonth) || endMonth < startMonth)
   const errors = {
@@ -62,7 +65,8 @@ export function TemplateDialog({
   const save = useMutation({
     mutationFn: () => {
       const input: TemplateInput = {
-        type, category_id: categoryId!, payer_id: payerId!, amount_cents: cents!, variable, note: note.trim(),
+        type, category_id: categoryId!, payer_id: payerId!, amount_cents: cents!, variable,
+        personal: personalAllowed && personal, note: note.trim(),
         start_month: startMonth, end_month: endMonth || null, active,
       }
       return template ? api.updateTemplate(template.id, input) : api.createTemplate(input)
@@ -177,6 +181,20 @@ export function TemplateDialog({
               </p>
             </div>
           </div>
+
+          {personalAllowed && (
+            <div className="bg-muted/40 flex items-start gap-3 rounded-xl border p-3">
+              <Switch id="tpl-personal" checked={personal} onCheckedChange={setPersonal} className="mt-0.5" />
+              <div className="space-y-0.5">
+                <Label htmlFor="tpl-personal">Personal</Label>
+                <p className="text-muted-foreground text-xs">
+                  {personal
+                    ? "Generated entries are personal and left out of the shared split (e.g. a gym membership)."
+                    : "Generated entries count as shared expenses (e.g. mortgage, electricity)."}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">

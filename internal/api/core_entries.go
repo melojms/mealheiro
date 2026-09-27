@@ -25,12 +25,14 @@ type coreEntryInput struct {
 	AmountCents int64    `json:"amount_cents"`
 	CategoryID  int64    `json:"category_id"`
 	PayerID     int64    `json:"payer_id"`
+	Personal    bool     `json:"personal"`
 	Note        string   `json:"note"`
 	Tags        []string `json:"tags"`
 }
 
-// validate checks in against the DB and normalizes note and tags. An archived
-// category is accepted only when it equals keepCategoryID (unchanged on update).
+// validate checks in against the DB and normalizes note, tags and the personal
+// flag. An archived category is accepted only when it equals keepCategoryID
+// (unchanged on update).
 func (in *coreEntryInput) validate(ctx context.Context, q *store.Queries, keepCategoryID int64) error {
 	if !coreValidEntryType(in.Type) {
 		return coreBadRequest{"invalid type"}
@@ -64,12 +66,20 @@ func (in *coreEntryInput) validate(ctx context.Context, q *store.Queries, keepCa
 	if cat.Type != in.Type {
 		return coreBadRequest{"category type does not match entry type"}
 	}
-	if _, err := q.GetPerson(ctx, in.PayerID); coreIsNoRows(err) {
+	payer, err := q.GetPerson(ctx, in.PayerID)
+	if coreIsNoRows(err) {
 		return coreBadRequest{"payer not found"}
 	} else if err != nil {
 		return err
 	}
+	in.Personal = personalAllowed(in.Type, payer.Kind) && in.Personal
 	return nil
+}
+
+// personalAllowed reports whether an entry or template of this type and payer
+// kind may be marked personal: only expenses paid by a person, never by Joint.
+func personalAllowed(entryType, payerKind string) bool {
+	return entryType == "expense" && payerKind == "person"
 }
 
 // coreEntryWriteFailed maps an entry write error to a response; false if err is nil.
@@ -126,7 +136,7 @@ func (s *Server) handleCreateEntry(w http.ResponseWriter, r *http.Request) {
 		var err error
 		id, err = q.CreateEntry(ctx, store.CreateEntryParams{
 			Type: in.Type, Date: in.Date, AmountCents: in.AmountCents,
-			CategoryID: in.CategoryID, PayerID: in.PayerID, Note: in.Note, Now: s.coreTimestamp(),
+			CategoryID: in.CategoryID, PayerID: in.PayerID, Personal: in.Personal, Note: in.Note, Now: s.coreTimestamp(),
 		})
 		if err != nil {
 			return err
@@ -161,7 +171,7 @@ func (s *Server) handleUpdateEntry(w http.ResponseWriter, r *http.Request) {
 		}
 		err = q.UpdateEntry(ctx, store.UpdateEntryParams{
 			Type: in.Type, Date: in.Date, AmountCents: in.AmountCents,
-			CategoryID: in.CategoryID, PayerID: in.PayerID, Note: in.Note,
+			CategoryID: in.CategoryID, PayerID: in.PayerID, Personal: in.Personal, Note: in.Note,
 			UpdatedAt: s.coreTimestamp(), ID: id,
 		})
 		if err != nil {
@@ -309,6 +319,16 @@ func coreParseEntryFilter(r *http.Request) (*coreEntryFilter, error) {
 		}
 		f.add("v.status = ?", st)
 	}
+	switch qs.Get("sharing") {
+	case "":
+	case "shared":
+		// Exactly the rows the shared-expenses report counts.
+		f.add("v.type = 'expense' AND NOT v.personal AND v.payer_kind = 'person'")
+	case "personal":
+		f.add("v.personal")
+	default:
+		return nil, errors.New("invalid sharing")
+	}
 
 	ints := map[string]*int64{}
 	for _, key := range []string{"category_id", "payer_id", "min_cents", "max_cents", "limit", "offset"} {
@@ -356,7 +376,7 @@ func coreParseEntryFilter(r *http.Request) (*coreEntryFilter, error) {
 
 const coreEntryViewColumns = `v.id, v.type, v.date, v.amount_cents, v.category_id, v.category_name,
 	v.parent_category_id, v.parent_category_name, v.top_category_id, v.payer_id, v.payer_name,
-	v.note, v.status, v.template_id, v.template_month, v.tags_csv, v.created_at, v.updated_at`
+	v.payer_kind, v.personal, v.note, v.status, v.template_id, v.template_month, v.tags_csv, v.created_at, v.updated_at`
 
 func (s *Server) handleListEntries(w http.ResponseWriter, r *http.Request) {
 	f, err := coreParseEntryFilter(r)
@@ -386,7 +406,7 @@ func coreQueryEntryList(ctx context.Context, db store.DBTX, f *coreEntryFilter) 
 		var v store.EntryView
 		if err := rows.Scan(&v.ID, &v.Type, &v.Date, &v.AmountCents, &v.CategoryID, &v.CategoryName,
 			&v.ParentCategoryID, &v.ParentCategoryName, &v.TopCategoryID, &v.PayerID, &v.PayerName,
-			&v.Note, &v.Status, &v.TemplateID, &v.TemplateMonth, &v.TagsCsv, &v.CreatedAt, &v.UpdatedAt); err != nil {
+			&v.PayerKind, &v.Personal, &v.Note, &v.Status, &v.TemplateID, &v.TemplateMonth, &v.TagsCsv, &v.CreatedAt, &v.UpdatedAt); err != nil {
 			return list, err
 		}
 		list.Entries = append(list.Entries, entryFromView(v))
