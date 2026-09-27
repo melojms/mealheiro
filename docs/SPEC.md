@@ -42,7 +42,7 @@ Monthly: `leftover = income − expenses − investments`. `savings rate = (inco
 - Quick-add tile order: **auto by usage** (count of entries in the last 90 days, desc; ties by name).
 
 Seed:
-- **Expense**: Water · Electricity · Gas · Internet & Phone · House (Rent, Mortgage, Condomínio, Insurance, Maintenance) · Groceries · Subscriptions · Car · Transport (Public, Taxi/Uber) · Clothes · Technology · Eating out · Health · Leisure · Travel · Gifts · Personal care · Education · Other
+- **Expense**: Water · Electricity · Gas · Internet & Phone · House (Rent, Mortgage, Management, Insurance, Maintenance) · Groceries · Subscriptions · Car · Transport (Public, Taxi/Uber) · Clothes · Technology · Eating out · Health · Leisure · Travel · Gifts · Personal care · Education · Other
 - **Income**: Salary · Bonus · Refund · Side income
 - **Investment**: ETFs/Stocks · Savings account · BTC
 
