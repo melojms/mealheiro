@@ -38,7 +38,7 @@ const startMonth = (() => {
 // Recurring templates (generation creates the monthly entries back to startMonth).
 const templates = [
   { type: "expense", category_id: id("Mortgage"), payer_id: 3, amount_cents: 65000, variable: false, note: "Crédito habitação" },
-  { type: "expense", category_id: id("Condomínio"), payer_id: 3, amount_cents: 4500, variable: false },
+  { type: "expense", category_id: id("Management"), payer_id: 3, amount_cents: 4500, variable: false },
   { type: "expense", category_id: id("Internet & Phone"), payer_id: 3, amount_cents: 4999, variable: false, note: "Fibra + 2 telemóveis" },
   { type: "expense", category_id: id("Subscriptions"), payer_id: 1, amount_cents: 1799, variable: false, note: "Streaming" },
   { type: "expense", category_id: id("Electricity"), payer_id: 3, amount_cents: 6500, variable: true },
